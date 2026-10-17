@@ -20,12 +20,14 @@
 | 项 | 状态 | 证据 |
 |---|---|---|
 | TypeScript 编译 | ✅ | `tsc -p tsconfig.json --noEmit` 退出码 0 |
-| 测试 | ✅ | `vitest run` → **328 通过 / 1 跳过 / 0 失败**（9 个文件，全离线） |
-| 真实校验器验证 | ✅ | 线上产物经 `@deepseek-ai/dsh-plugin-market-index` 校验通过 |
-| 全量构建 | ✅ | 5452 个插件（2587 npm + 2865 git） |
+| 测试 | ✅ | `vitest run` → **354 通过 / 1 跳过 / 0 失败**（10 个文件，全离线） |
+| 真实校验器验证 | ✅ | 产物经 `@deepseek-ai/dsh-plugin-market-index` 校验通过 |
+| 全量构建 | ✅ | 5452 个插件、37220 个版本（2587 npm + 2865 git） |
+| 版本历史 | ✅ | 2331 个插件共新增 33411 个版本；637 个插件带 `engines.dsh` |
+| 能力/风险/热度标签 | ✅ | 24 个已声明标签；1031 个插件带 `shell`，343 个带至少一个 `risk:` |
 | deny 名单 fail-open | ✅ 已修复 | 见下方「已修复」；`git+https` / SSH / 非 GitHub 域名均被拒绝 |
 | 市场描述含源码出处 | ✅ | 两语言均带 `https://github.com/hytime/dsh-discover-index`，长度 127 / 88，未触及 DSH 的 300 上限 |
-| Git | ✅ | 5 次提交，已推送 `main`，工作区干净 |
+| Git | ✅ | 6 次提交，已推送 `main` |
 | GitHub 仓库 | ✅ | <https://github.com/hytime/dsh-discover-index> |
 | GitHub Pages | ✅ | <https://hytime.github.io/dsh-discover-index/index.json> 返回 200 |
 | CI 工作流实跑 | ✅ | `Validate` 通过；`Build and deploy index` build + deploy 通过 |
@@ -38,16 +40,20 @@
 ```
 node dist/cli.js build
   → 2607 条 npm 条目 + 3097 条需 git 解析（73 条命中缓存）
-  → 5648 个候选 → 5451 个插件
-  → 3011 次请求（16 次重试），89% 带 star 数
-  → dist/index.json ≈ 7.7 MB
+  → 2607 份 registry 文档用于版本历史（约 150 MB）
+  → 5649 个候选 → 5452 个插件、37220 个版本
+  → 2644 次请求（10 次重试），89% 带 star 数
+  → dist/index.json ≈ 13.0 MB（gzip 2.13 MB）
 ```
 
-线上（CI 冷启动、无缓存）：5452 个插件，7.73 MB，真校验器通过。
+版本数分布：3224 个插件仅 1 个版本（多为 git 解析或 registry 无额外版本），103 个插件超过 50 个版本，最多的 `billion-context` 有 3744 个。超过 100 个版本的 103 个插件贡献了 17% 的版本量。
 
-拒绝原因分布：policy 197（144 + 53 为重复包名）、resolve 56（30 仓库不可达 / 16 无 `dsh.bundle` / 3 无可用 name+version / 5 包名非法 / 2 路径无 `package.json`）。
 
-> 本地与线上相差 1 个插件属于每次运行都会有的上游抖动：目录条目在变、仓库 HEAD 在动。不是回归。
+线上（CI 冷启动、无缓存）：覆写为最新一次 CI 构建的实测值。
+
+拒绝原因分布：policy 197（164 + 33 为重复包名）、resolve 55（29 仓库不可达 / 16 无 `dsh.bundle` / 3 无可用 name+version / 5 包名非法 / 2 路径无 `package.json`）。
+
+> 本地与线上数字略有差异属于每次运行都会有的上游抖动：目录条目在变、仓库 HEAD 在动。不是回归。
 
 ---
 
@@ -60,8 +66,9 @@ extract → resolve → select → render → validate
 | 模块 | 职责 |
 |---|---|
 | [`sources/upstream-catalog.ts`](src/sources/upstream-catalog.ts) | 读线上目录；纯函数 `parseUpstreamCatalog` 可离线测 |
-| [`resolve/npm.ts`](src/resolve/npm.ts) | 已有 npm 包名的条目 → 零网络转换 |
+| [`resolve/npm.ts`](src/resolve/npm.ts) | 已有 npm 包名的条目 → 零网络转换；从 registry 文档展开全部可安装版本 |
 | [`resolve/git.ts`](src/resolve/git.ts) | 无包名条目 → `git ls-remote` 取 SHA + `raw@SHA` 取 manifest |
+| [`resolve/discovery.ts`](src/resolve/discovery.ts) | 能力 → 标签、红线句子归一化、热度分档、搜索关键词 |
 | [`resolve/urls.ts`](src/resolve/urls.ts) | 拆解 `/tree/main/packages/x` 子路径 |
 | [`resolve/package-name.ts`](src/resolve/package-name.ts) | npm 包名合法性（唯一真源） |
 | [`resolve/version-rules.ts`](src/resolve/version-rules.ts) | SemVer / `engines.dsh` / 时间戳 / git 源规则 |
@@ -77,6 +84,8 @@ extract → resolve → select → render → validate
 3. **`versions` 必须非空**，所以解析不出可安装版本的条目**带原因丢弃**，绝不产出空壳。
 4. **发现过程不消耗 GitHub REST 配额**：`git ls-remote` + `raw.githubusercontent.com`，不烧 5000/小时的核心配额。
 5. **发布前有双闸门**：真校验器 + 插件数下限（<2000 拒绝发布），且 deploy 是独立 job，坏索引无法顶掉好索引。
+6. **热度做成标签必须分档，不能精确。** label id 在索引里只声明一次、由插件引用，不存在「每插件 label 值」。精确值需要 235 个星标标签 + 1690 个下载量标签，筛选菜单会不可用。精确数字留在 `sortKeys`（DSH 也会通过 `plugin_market` 工具交给模型）。
+7. **版本历史是 best-effort。** registry 不可达时保留上游那一个版本——让一次 registry 故障导致插件从市场上消失，比只显示一个版本更糟。
 
 ---
 

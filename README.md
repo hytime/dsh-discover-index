@@ -23,7 +23,7 @@ Published and automated. The index URL above serves a live document, rebuilt dai
 | Check | Result |
 | --- | --- |
 | TypeScript | compiles clean |
-| Tests | 328 passing, offline, against fixtures recorded from the live catalog |
+| Tests | 354 passing, offline, against fixtures recorded from the live catalog |
 | Published index | 5,452 plugins, format 1, accepted by the real validator |
 | Automation | daily cron, plus `workflow_dispatch` for a manual rebuild |
 
