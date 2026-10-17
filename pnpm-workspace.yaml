@@ -1,18 +1,22 @@
 # pnpm configuration.
 #
-# This file exists for exactly one reason: pnpm 10 and later no longer read the
-# `pnpm` field of package.json. The field is still accepted, still warned
-# about, and silently ignored — so build-script approval has to live here or it
-# does nothing at all.
+# This file exists for exactly one reason: build-script approval. pnpm refuses
+# to run a dependency's install scripts unless the dependency is named here,
+# and it treats an unapproved script as a hard error rather than a warning:
 #
-# That matters for one dependency. esbuild ships a platform binary through a
-# postinstall script, and vitest cannot transform TypeScript without it. The
-# symptom of getting this wrong is not an install error: it is a test run that
-# dies inside the transform step, which reads like a broken test suite.
+#   [ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: esbuild@0.28.2
 #
-# The list is an allowlist, not a convenience. Approving a build script means
-# letting that package execute arbitrary code at install time, so a new entry
-# should be a deliberate decision with a reason, not a reflex reaction to a
-# pnpm warning.
-onlyBuiltDependencies:
-  - esbuild
+# so `pnpm install --frozen-lockfile` exits 1 and CI stops at the install step.
+#
+# The key is `allowBuilds`, map form. Two neighbours do NOT work in pnpm 11:
+# a `pnpm` field in package.json (pnpm 10+ stopped reading it) and a top-level
+# `onlyBuiltDependencies` list (accepted, silently ignored, and the install
+# still fails). Both were tried here and both let a green local build hide a
+# broken CI install — the local machine happened to have the binary cached.
+#
+# The entry is an allowlist decision, not a convenience: approving a build
+# script means letting that package execute arbitrary code at install time.
+# esbuild ships the platform binary that vitest and tsx need to transform
+# TypeScript; without it every test run dies inside the transform step.
+allowBuilds:
+  esbuild: true
