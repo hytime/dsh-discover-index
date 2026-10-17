@@ -54,5 +54,38 @@ const en = parsed.plugins.filter(p=>p.title?.en)
 console.log(`\nINFO  ${parsed.plugins.length} plugins, ${parsed.plugins.filter(p=>p.versions[0].source.type==='npm').length} npm-sourced, ${parsed.plugins.filter(p=>p.versions[0].source.type==='git').length} git-sourced`)
 console.log(`INFO  categories declared: ${Object.keys(parsed.metadata.categories).length}, sortKeys: ${Object.keys(parsed.metadata.sortKeys).join(',')}`)
 console.log(`INFO  ${en.length} plugins carry a title`)
+
+// EXTRA: the tightened rules, asserted against the real artifact rather than a
+// unit fixture. These are the invariants the verifier's robustness suite proved
+// were once missing; here they are confirmed on 5,000+ plugins produced from the
+// live catalog.
+const semver = (await import('semver')).default
+const badVersions = []
+const badRanges = []
+const badTimestamps = []
+const badSources = []
+for (const p of parsed.plugins) {
+  for (const v of p.versions) {
+    if (semver.valid(v.version) === null) badVersions.push(`${p.name}@${v.version}`)
+    if (v.version !== v.version.trim() || /^v/u.test(v.version)) badVersions.push(`${p.name}@${v.version} (unnormalised)`)
+    if (v.engines?.dsh !== undefined && (v.engines.dsh.startsWith('workspace:') || semver.validRange(v.engines.dsh) === null)) {
+      badRanges.push(`${p.name}: ${v.engines.dsh}`)
+    }
+    if (!Number.isInteger(v.publishTimestamp) || v.publishTimestamp < 0 || v.publishTimestamp >= 1e11) {
+      badTimestamps.push(`${p.name}@${v.version}: ${v.publishTimestamp}`)
+    }
+    if (v.source.type === 'git') {
+      const s = v.source
+      if (!/^[0-9a-f]{40}$/u.test(s.commit)) badSources.push(`${p.name}: commit ${s.commit}`)
+      if (s.url.includes('?') || s.url.includes('#') || s.url.includes('/tree/')) badSources.push(`${p.name}: url ${s.url}`)
+      if (!s.url.startsWith('https://')) badSources.push(`${p.name}: non-https ${s.url}`)
+    }
+  }
+}
+check('tightened: every version is exact SemVer and normalised', badVersions.length === 0, badVersions.slice(0, 3).join('; '))
+check('tightened: every engines.dsh is a non-workspace SemVer range', badRanges.length === 0, badRanges.slice(0, 3).join('; '))
+check('tightened: every publishTimestamp is in [0, 1e11)', badTimestamps.length === 0, badTimestamps.slice(0, 3).join('; '))
+check('tightened: every git source is https, canonical, unpinned-query-free, lowercase 40-hex', badSources.length === 0, badSources.slice(0, 3).join('; '))
+
 console.log(fail.length? `\n${fail.length} FAILURES` : '\nALL REAL-OUTPUT CHECKS PASSED')
 process.exit(fail.length?1:0)

@@ -67,10 +67,50 @@ export function slugFor(url: string): string {
   return location.directory ? `${base}--${location.directory.replaceAll('/', '-')}` : base
 }
 
-/** `owner/repo` identity, for deny-list comparisons. */
+/**
+ * `owner/repo` identity from a repository URL, for deny-list comparisons.
+ *
+ * Deliberately more permissive than `decomposeRepoUrl`, and the difference is
+ * the point. `decomposeRepoUrl` answers "can I clone this and display it?" and
+ * so insists on github.com, because that is what format 1's install sources
+ * accept. This function answers a question with opposite failure semantics:
+ * "is this the repository I must never list?" A deny rule that returns
+ * `undefined` for a URL shape it did not anticipate FAILS OPEN, and the entry
+ * it fails to recognise is the one entry a visitor would notice. So this
+ * recognises every shape a repository URL arrives in — npm's `git+https://`
+ * form, a trailing `.git`, any host, a monorepo subpath — and only returns
+ * `undefined` when there is genuinely no repository in the string.
+ *
+ * @param url - any repository URL.
+ * @returns `owner/repo`, or `undefined` when the string names no repository.
+ */
 export function repoIdentity(url: string): string | undefined {
-  const location = decomposeRepoUrl(url)
-  return location ? `${location.owner}/${location.name}` : undefined
+  // npm and package manifests write `git+https://…` and `git+ssh://…`; the
+  // prefix is protocol metadata, not part of the repository.
+  const withoutPrefix = url.replace(/^git\+/u, '').trim()
+  // `git@github.com:owner/repo.git` is the SCP-like SSH form, which `new URL`
+  // cannot parse. Normalise it rather than letting it fail open.
+  const scp = /^(?:ssh:\/\/)?git@([^/:]+)[:/](.+)$/u.exec(withoutPrefix)
+  const normalized = scp
+    ? `https://${scp[1]}/${scp[2] ?? ''}`
+    : withoutPrefix
+
+  let parsed: URL
+  try {
+    parsed = new URL(normalized)
+  } catch {
+    return undefined
+  }
+
+  const segments = parsed.pathname.replace(/^\/+|\/+$/gu, '').split('/').filter((segment) => segment !== '')
+  const owner = segments[0]
+  let name = segments[1]
+  if (!owner || !name) return undefined
+  // A `/tree/<ref>/…` path names a package inside the repository, not a
+  // different repository.
+  name = name.replace(/\.git$/u, '')
+  if (name === '') return undefined
+  return `${owner}/${name}`
 }
 
 /**
