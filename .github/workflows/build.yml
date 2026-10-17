@@ -33,7 +33,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # pnpm/action-setup must run BEFORE actions/setup-node: setup-node's
       # `cache: pnpm` shells out to the pnpm binary to locate the store.
@@ -44,10 +44,10 @@ jobs:
       # major here is how a `--frozen-lockfile` install starts failing on a
       # lockfile that installs fine locally.
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -65,7 +65,7 @@ jobs:
       # CLI also expires entries older than 7 days on its own, so a cache that
       # survives many runs cannot freeze the index on a stale version.
       - name: Restore the git-resolution cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: data/resolve-cache.json
           key: resolve-cache-${{ github.run_id }}
@@ -139,7 +139,7 @@ jobs:
           done
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
@@ -152,4 +152,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
