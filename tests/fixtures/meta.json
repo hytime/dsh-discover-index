@@ -1,0 +1,89 @@
+{
+ "recordedAt": "2026-10-17T21:11:00+08:00",
+ "upstream": {
+  "url": "https://awesome-dsh-plugin.com/plugins.json",
+  "httpStatus": 200,
+  "bytes": 7082448,
+  "sha256": "b8f15642a7359c086a15f3a8611a0681c737a7899c53e686f1b569a676f01ef3",
+  "catalogUpdated": "2026-10-17",
+  "catalogCount": 5704,
+  "fetchedEntryCount": 5704,
+  "note": "tests/fixtures/upstream-catalog-min.json is a REAL recorded subset of this file; description text is truncated to 400 chars per language; one SYNTHETIC deepseek-ai/deepseek-harness entry is appended as a deny-list control (upstream contained 0 such entries)."
+ },
+ "reconCounts": {
+  "duplicateBasenames_caseInsensitive_rootLevelRepos": 271,
+  "duplicateBasenames_caseInsensitive_allEntries": 286,
+  "duplicateBasenames_caseSensitive_allEntries": 283,
+  "entriesWithUppercaseInUpstreamNameField": 225,
+  "reposWithUppercaseInRepositoryName": 216,
+  "urlsWithTreeSubpath": 597,
+  "urlsWithTreeSubpath_withoutNpmIdentity": 289,
+  "uniqueReposOwningTreeSubpathEntries": 401,
+  "entriesWithNpmIdentity": 2607,
+  "entriesWithoutNpmIdentity": 3097,
+  "entriesOwnedBy_deepseek_ai": 0,
+  "entriesWhoseUrlContains_deepseek_harness": 46,
+  "uniqueOwnerRepoPairs": 5505,
+  "upstreamSha256": "b8f15642a7359c086a15f3a8611a0681c737a7899c53e686f1b569a676f01ef3",
+  "upstreamBytes": 7082448,
+  "upstreamCount": 5704,
+  "upstreamPluginsLength": 5704
+ },
+ "npmPackuments": [
+  {
+   "fixture": "npm/dsh-engram.json",
+   "package": "dsh-engram",
+   "versions": 10
+  },
+  {
+   "fixture": "npm/@zzerx__dsh-plugin-notes.json",
+   "package": "@zzerx/dsh-plugin-notes",
+   "versions": 12
+  },
+  {
+   "fixture": "npm/dsh-gungnir.json",
+   "package": "dsh-gungnir",
+   "versions": 6
+  },
+  {
+   "fixture": "npm/dsh-proactive.json",
+   "package": "dsh-proactive",
+   "versions": 8
+  }
+ ],
+ "manifests": [
+  {
+   "fixture": "manifests/raw-dragview.json",
+   "repo": "anzhaohao/DragView",
+   "name": "dsh-dragview",
+   "version": "0.1.1"
+  },
+  {
+   "fixture": "manifests/raw-proactive.json",
+   "repo": "john-walks-slow/dsh-proactive@packages/dsh-proactive",
+   "name": "dsh-proactive",
+   "version": "0.3.1"
+  },
+  {
+   "fixture": "manifests/raw-engram-kenz.json",
+   "repo": "kenz1117/dsh-engram",
+   "name": "@kenz1117/dsh-engram",
+   "version": "0.8.14"
+  }
+ ],
+ "reconDefinitions": {
+  "duplicateBasenames_caseInsensitive_rootLevelRepos": "distinct repository basenames, lowercased, claimed by >1 owner, counting entries whose url is a repository root (no /tree/ subpath). THIS is the definition under which the brief's 271 reproduces exactly.",
+  "entriesWithUppercaseInUpstreamNameField": "entries whose upstream `name` field contains an uppercase letter. THIS is the definition under which the brief's 225 reproduces exactly.",
+  "reposWithUppercaseInRepositoryName": "distinct (owner, repo) pairs whose repository name contains uppercase letters; 216, not 225.",
+  "urlsWithTreeSubpath": "the actual count is 597, not the brief's 285; 289 of those have no npm identity and 281 point at .../packages/*.",
+  "duplicateBasenames_caseInsensitive_allEntries": "distinct lowercased repository basenames claimed by >1 owner, counting every entry including those whose url has a /tree/ subpath: 286.",
+  "duplicateBasenames_caseSensitive_allEntries": "distinct repository basenames compared case-sensitively, claimed by >1 owner, all entries: 283.",
+  "entriesWithNpmIdentity": "entries carrying a usable upstream `npm` package name: 2607. These convert with no network call.",
+  "entriesWithoutNpmIdentity": "entries with no upstream `npm` value: 3097. Each needs git resolution or must be dropped.",
+  "urlsWithTreeSubpath_withoutNpmIdentity": "entries whose url has a /tree/ subpath AND no npm identity: 289. These are the entries that would hit the recorded `git ls-remote` failure if the URL were not decomposed.",
+  "uniqueReposOwningTreeSubpathEntries": "distinct (owner, repo) pairs owning at least one /tree/ entry: 401. One repository can publish several subdirectory packages.",
+  "uniqueOwnerRepoPairs": "distinct (owner, repo) pairs across all entries: 5505, against 5704 entries — the same repository can appear more than once.",
+  "entriesOwnedBy_deepseek_ai": "entries whose owner is deepseek-ai: 0. The product repository is absent from upstream, so case 5 is covered by a synthetic control entry in the recorded fixture.",
+  "entriesWhoseUrlContains_deepseek_harness": "entries whose url merely contains the substring \"deepseek-harness\": 46. None is the first-party repository; a deny rule matching the substring rather than the identity would wrongly drop all 46."
+ }
+}

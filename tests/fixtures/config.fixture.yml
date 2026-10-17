@@ -1,0 +1,41 @@
+version: 1
+
+sources:
+  - id: fixture-live
+    kind: upstream-catalog
+    enabled: true
+    url: https://fixture.example.test/plugins.json
+    minStars: 0
+    priority: 10
+  - id: fixture-secondary
+    kind: upstream-catalog
+    enabled: true
+    minStars: 5
+    priority: 3
+
+denyRepos:
+  - deepseek-ai/deepseek-harness
+
+denyPackages:
+  - dsh-banned-package
+
+profiles:
+  - id: index
+    title:
+      en: Fixture Index
+      zh: 测试索引
+    description:
+      en: Offline fixture profile.
+      zh: 离线测试配置。
+    sources:
+      - fixture-live
+    minStars: 0
+    output: index.json
+  - id: popular
+    title:
+      en: Popular
+    sources:
+      - fixture-live
+      - fixture-secondary
+    minStars: 5
+    output: popular.json

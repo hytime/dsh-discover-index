@@ -1,0 +1,502 @@
+{
+ "name": "awesome-dsh-plugin",
+ "url": "https://awesome-dsh-plugin.com",
+ "source": "https://github.com/awesome-dsh-plugin/awesome-dsh-plugin",
+ "updated": "2026-10-17",
+ "count": 5704,
+ "categories": {
+  "agi": {
+   "en": "AGI Architecture Exploration",
+   "zh": "AGI 架构探索"
+  },
+  "ui": {
+   "en": "UI Enhancements",
+   "zh": "UI 增强"
+  },
+  "usage": {
+   "en": "Usage & Billing",
+   "zh": "用量与计费"
+  },
+  "theme": {
+   "en": "Themes & Appearance",
+   "zh": "主题与外观"
+  },
+  "model": {
+   "en": "Models & Providers",
+   "zh": "模型与账号接入"
+  },
+  "identity": {
+   "en": "Identity & Communication",
+   "zh": "身份与通信"
+  },
+  "session": {
+   "en": "Sessions & Messages",
+   "zh": "会话与消息"
+  },
+  "memory": {
+   "en": "Memory",
+   "zh": "记忆"
+  },
+  "tools": {
+   "en": "Tools & Capabilities",
+   "zh": "工具与能力"
+  },
+  "wsl": {
+   "en": "WSL & Windows Interop",
+   "zh": "WSL 与 Windows 互操作"
+  },
+  "browser": {
+   "en": "Browser & Web",
+   "zh": "浏览器与网页"
+  },
+  "vision": {
+   "en": "Vision & Multimodal",
+   "zh": "视觉与多模态"
+  },
+  "voice": {
+   "en": "Voice & Audio",
+   "zh": "语音与音频"
+  },
+  "docs": {
+   "en": "Docs & Rendering",
+   "zh": "文档与渲染"
+  },
+  "skill": {
+   "en": "Skills",
+   "zh": "技能包"
+  },
+  "workflow": {
+   "en": "Workflow & Automation",
+   "zh": "工作流与自动化"
+  },
+  "git": {
+   "en": "Git & Code Review",
+   "zh": "Git 与代码评审"
+  },
+  "notify": {
+   "en": "Notifications & Integrations",
+   "zh": "通知与集成"
+  },
+  "dev": {
+   "en": "Development & Runtime",
+   "zh": "开发与运行时"
+  },
+  "security": {
+   "en": "Security & Permissions",
+   "zh": "安全与权限"
+  },
+  "remote": {
+   "en": "Remote & Mobile",
+   "zh": "远程与移动端"
+  },
+  "market": {
+   "en": "Plugin Markets & Managers",
+   "zh": "插件市场与管理"
+  },
+  "fun": {
+   "en": "Just for Fun",
+   "zh": "娱乐"
+  }
+ },
+ "plugins": [
+  {
+   "name": "dsh-j-space",
+   "owner": "AnonyJcy",
+   "url": "https://github.com/AnonyJcy/dsh-j-space",
+   "page": "https://awesome-dsh-plugin.com/p/AnonyJcy/dsh-j-space/",
+   "category": "agi",
+   "description": {
+    "en": "J-Space Cognition Suite SV1 native agent preset and standalone Cordis plugin: 13 modules, persistent controller and decoupled workspace.",
+    "zh": "J-Space Cognition Suite SV1 原生智能体预设与 Cordis 插件：提供 13 大认知工程模块、持久化控制器与状态外化工作区。"
+   },
+   "npm": "@anonyjcy/dsh-j-space",
+   "version": "1.2.4",
+   "stars": 5,
+   "downloads": 2053,
+   "downloadsStart": "2026-09-17",
+   "downloadsEnd": "2026-10-16",
+   "downloadsCheckedAt": "2026-10-17",
+   "capabilities": [
+    "fs-write",
+    "fs-read",
+    "env"
+   ],
+   "capabilityRedLines": [],
+   "capabilityCheckedAt": "2026-10-17T09:55:28.306Z",
+   "install": "dsh plugin --profile web add @anonyjcy/dsh-j-space",
+   "added": "2026-09-20"
+  },
+  {
+   "name": "dsh-proactive",
+   "owner": "john-walks-slow",
+   "url": "https://github.com/john-walks-slow/dsh-proactive/tree/main/packages/dsh-proactive",
+   "page": "https://awesome-dsh-plugin.com/p/john-walks-slow/dsh-proactive--packages-dsh-proactive/",
+   "category": "agi",
+   "description": {
+    "en": "Host-level proactive wake-ups for DeepSeek Harness: the model schedules its own alarms (once, recurring interval, or cron, with optional random jitter), cold sessions are woken on time by session resume, model-initiated follow-ups are gated by quiet hours and a daily delivery budget, silent wake turns end with proactive_reclaim and fold out of model context as tombstones, declared schedule files g",
+    "zh": "为 DeepSeek Harness 提供 host 级主动唤醒：模型用 proactive_set 给自己设定闹钟（单次 / 循环间隔 / cron，支持 jitter 随机抖动），到点自动唤醒冷会话执行心跳、定时提醒与任务跟进；安静时段与每日投递预算约束模型自主跟进，静默唤醒以 proactive_reclaim 收尾并把唤醒上下文折叠为墓碑；声明式闹钟文件把 JSON 时间表幂等同步成 host 闹钟，min_idle_seconds 静默门让唤醒等会话空闲；自带 Web 管理面板（设置页节 + 会话页签，SSE 实时刷新）管理闹钟与唤醒历史——适合驱动 AI 陪伴、角色扮演（酒馆式人设）与 living agent 的心跳、日常安排和世界演算。"
+   },
+   "npm": "dsh-proactive",
+   "version": "0.3.1",
+   "stars": 5,
+   "downloads": 2647,
+   "downloadsStart": "2026-09-17",
+   "downloadsEnd": "2026-10-16",
+   "downloadsCheckedAt": "2026-10-17",
+   "install": "dsh plugin --profile web add dsh-proactive",
+   "added": "2026-09-21",
+   "screenshots": [
+    "https://raw.githubusercontent.com/john-walks-slow/dsh-proactive/HEAD/packages/dsh-proactive/assets/screenshot-1.png",
+    "https://raw.githubusercontent.com/john-walks-slow/dsh-proactive/HEAD/packages/dsh-proactive/assets/screenshot-2.png"
+   ]
+  },
+  {
+   "name": "dsh-engram",
+   "owner": "kenz1117",
+   "url": "https://github.com/kenz1117/dsh-engram",
+   "page": "https://awesome-dsh-plugin.com/p/kenz1117/dsh-engram/",
+   "category": "agi",
+   "description": {
+    "en": "Cross-session long-term memory under the \"memory palace\" metaphor: dual-scope SQLite stores (user + per-git-origin project), hybrid FTS5 + local-vector retrieval with RRF fusion and recency/proof ranking boost, automatic capture from the session log (including the final turn), provenance audit chains, consolidation distillation and decay forgetting, and a settings-page Memory Library panel with co",
+    "zh": "跨会话长期记忆插件，以「记忆宫殿」隐喻重构 agent 长期记忆：双层 SQLite 分库（用户级 + 按 git origin 隔离的项目级）、FTS5 + 本地向量 RRF 融合与新鲜度/命中排序 boost、从会话日志自动摄取（含末轮）、来源审计链、巩固蒸馏与衰减遗忘，以及设置页「记忆库」面板（走廊拓扑、导览管家、翻新清单）。"
+   },
+   "npm": "@kenz1117/dsh-engram",
+   "version": "0.8.12",
+   "stars": 21,
+   "downloads": 5981,
+   "downloadsStart": "2026-09-17",
+   "downloadsEnd": "2026-10-16",
+   "downloadsCheckedAt": "2026-10-17",
+   "capabilities": [
+    "shell",
+    "fs-write",
+    "fs-read",
+    "network",
+    "env",
+    "llm"
+   ],
+   "capabilityRedLines": [],
+   "capabilityCheckedAt": "2026-10-17T09:55:28.306Z",
+   "install": "dsh plugin --profile web add @kenz1117/dsh-engram",
+   "added": "2026-09-01"
+  },
+  {
+   "name": "dsh-engram",
+   "owner": "skepsun",
+   "url": "https://github.com/skepsun/dsh-engram",
+   "page": "https://awesome-dsh-plugin.com/p/skepsun/dsh-engram/",
+   "category": "memory",
+   "description": {
+    "en": "Zero-LLM auto-capture and a symbolic \\[ENGRAM\\] index with progressive disclosure, an ESR-lite task/evidence protocol (esr_task / esr_node / esr_close / esr_link), and per-workspace usage telemetry with an offline recall benchmark (npm run eval).",
+    "zh": "零 LLM 自动捕获 + 符号化 \\[ENGRAM\\] 索引渐进披露，配 ESR-lite 任务/证据闭环（esr_task / esr_node / esr_close / esr_link）、按工作区的真实使用遥测与离线召回基准（npm run eval）。"
+   },
+   "npm": "dsh-engram",
+   "version": "0.5.0",
+   "stars": 6,
+   "downloads": 1334,
+   "downloadsStart": "2026-09-17",
+   "downloadsEnd": "2026-10-16",
+   "downloadsCheckedAt": "2026-10-17",
+   "capabilities": [
+    "shell",
+    "fs-write",
+    "fs-read",
+    "network",
+    "env"
+   ],
+   "capabilityRedLines": [],
+   "capabilityCheckedAt": "2026-10-17T09:55:28.306Z",
+   "install": "dsh plugin --profile web add dsh-engram",
+   "added": "2026-08-21"
+  },
+  {
+   "name": "dsh-pua",
+   "owner": "MichengAI",
+   "url": "https://github.com/MichengAI/dsh-pua",
+   "page": "https://awesome-dsh-plugin.com/p/MichengAI/dsh-pua/",
+   "category": "agi",
+   "description": {
+    "en": "Adds /pua to steer the agent to try another approach and verify results before claiming completion, with 15 company styles, persona modes, global and per-conversation settings, and an optional loop that continues until a verification command passes, the iteration limit is reached, or the user cancels.",
+    "zh": "提供 /pua，在 Agent 失败后促使其换方法，并在宣称完成前核验收据；含 15 种公司风格、角色模式、全局与会话设置，以及可选验收循环（直到验收命令通过、达到迭代上限或用户取消）。"
+   },
+   "npm": "@michengai/dsh-pua",
+   "version": "0.3.28",
+   "stars": 20,
+   "downloads": 64105,
+   "downloadsStart": "2026-09-17",
+   "downloadsEnd": "2026-10-16",
+   "downloadsCheckedAt": "2026-10-17",
+   "capabilities": [
+    "shell",
+    "fs-read"
+   ],
+   "capabilityRedLines": [],
+   "capabilityCheckedAt": "2026-10-17T09:55:28.306Z",
+   "install": "dsh plugin --profile web add @michengai/dsh-pua",
+   "added": "2026-09-18"
+  },
+  {
+   "name": "dsh-pua",
+   "owner": "panando",
+   "url": "https://github.com/panando/dsh-pua",
+   "page": "https://awesome-dsh-plugin.com/p/panando/dsh-pua/",
+   "category": "agi",
+   "description": {
+    "en": "Fork of @michengai/dsh-pua that removes the upstream global kill-switch so the composer entry is always visible while the feature stays off by default and can be toggled per session; the entry is a dropdown (Turn on / Turn off / Options) with a more compact options panel.",
+    "zh": "基于 @michengai/dsh-pua 的修订版：解除上游「全局总闸」，让入口恒常显示、功能默认关闭并可按会话开关；入口改为下拉菜单（打开 / 关闭 / 选项），选项面板更紧凑。"
+   },
+   "npm": "@panando/dsh-pua",
+   "version": "0.2.1",
+   "stars": 0,
+   "downloads": 1262,
+   "downloadsStart": "2026-09-17",
+   "downloadsEnd": "2026-10-16",
+   "downloadsCheckedAt": "2026-10-17",
+   "capabilities": [
+    "shell",
+    "fs-write",
+    "fs-read"
+   ],
+   "capabilityRedLines": [],
+   "capabilityCheckedAt": "2026-10-17T09:55:28.306Z",
+   "install": "dsh plugin --profile web add @panando/dsh-pua",
+   "added": "2026-10-16"
+  },
+  {
+   "name": "DragView",
+   "owner": "anzhaohao",
+   "url": "https://github.com/anzhaohao/DragView",
+   "page": "https://awesome-dsh-plugin.com/p/anzhaohao/DragView/",
+   "category": "ui",
+   "description": {
+    "en": "Drag-and-drop file attachments as Codex-style cards, with in-app PDF/text/video/audio previews and system-default opening for other formats.",
+    "zh": "拖拽文件以 Codex 风格附件卡片呈现，支持 PDF/文本/音视频应用内预览，其余格式调用系统默认应用打开。"
+   },
+   "npm": "dsh-dragview",
+   "version": "0.1.1",
+   "stars": 1,
+   "downloads": 789,
+   "downloadsStart": "2026-09-17",
+   "downloadsEnd": "2026-10-16",
+   "downloadsCheckedAt": "2026-10-17",
+   "capabilities": [
+    "shell",
+    "fs-write",
+    "fs-read",
+    "network",
+    "env"
+   ],
+   "capabilityRedLines": [],
+   "capabilityCheckedAt": "2026-09-24T17:02:46.730Z",
+   "install": "dsh plugin --profile web add dsh-dragview",
+   "added": "2026-08-25"
+  },
+  {
+   "name": "DSH-Plugin_awl",
+   "owner": "AWL-MC2",
+   "url": "https://github.com/AWL-MC2/DSH-Plugin_awl",
+   "page": "https://awesome-dsh-plugin.com/p/AWL-MC2/DSH-Plugin_awl/",
+   "category": "ui",
+   "description": {
+    "en": "Wallpaper-aware readability repair for the DSH Web GUI: it lifts the three low-contrast secondary text tokens with color-mix plus an adjustable text halo, adds content rules (bold, permanently underlined or recoloured links, tinted headings and body text) scoped to conversation Markdown only, offers adjustable rainbow-edge and gradient-fill heading effects, loads custom fonts from the plugin folde",
+    "zh": "面向 DSH Web 的「壁纸感知」可读性修复：用 color-mix 把三个低对比次级文字 token 向主文字靠拢，并叠加可调强度的文字光晕；提供仅作用于会话 Markdown 的内容规则（链接加粗 / 常驻下划线 / 变色、标题与正文变色）、可调的彩虹描边与渐变填充标题特效、从插件目录或 DSH_HOME 加载的自定义字体，以及带 WCAG 对比度徽标的可拖动 WYSIWYG 预览窗。"
+   },
+   "npm": "dsh-type-tune",
+   "version": "0.1.0",
+   "stars": 0,
+   "downloads": 195,
+   "downloadsStart": "2026-09-17",
+   "downloadsEnd": "2026-10-16",
+   "downloadsCheckedAt": "2026-10-17",
+   "capabilities": [
+    "fs-write",
+    "fs-read",
+    "network",
+    "env"
+   ],
+   "capabilityRedLines": [],
+   "capabilityCheckedAt": "2026-10-17T09:55:28.306Z",
+   "install": "dsh plugin --profile web add dsh-type-tune",
+   "added": "2026-10-13"
+  },
+  {
+   "name": "dsh-TUI",
+   "owner": "ccch1mneyyy",
+   "url": "https://github.com/ccch1mneyyy/dsh-TUI",
+   "page": "https://awesome-dsh-plugin.com/p/ccch1mneyyy/dsh-TUI/",
+   "category": "ui",
+   "description": {
+    "en": "Claude Code-style full-screen terminal UI: pixel-whale header, live status line, and streaming thought expansion.",
+    "zh": "Claude Code 风格全屏终端 UI：像素鲸鱼顶栏、实时工作状态行、思考流式展开。"
+   },
+   "npm": "@deepseek-harness-tui/dsh-tui",
+   "version": "0.15.0",
+   "stars": 4685,
+   "downloads": 43174,
+   "downloadsStart": "2026-09-17",
+   "downloadsEnd": "2026-10-16",
+   "downloadsCheckedAt": "2026-10-17",
+   "capabilities": [
+    "shell",
+    "fs-write",
+    "fs-read",
+    "network",
+    "credentials",
+    "env",
+    "host-runtime"
+   ],
+   "capabilityRedLines": [
+    "reads credentials/secrets AND has network access"
+   ],
+   "capabilityCheckedAt": "2026-10-17T09:55:28.306Z",
+   "install": "dsh plugin --profile web add @deepseek-harness-tui/dsh-tui",
+   "added": "2026-08-14"
+  },
+  {
+   "name": "DeepSeek-Balance-Whale-Widget",
+   "owner": "MeteorNOX",
+   "url": "https://github.com/MeteorNOX/DeepSeek-Balance-Whale-Widget",
+   "page": "https://awesome-dsh-plugin.com/p/MeteorNOX/DeepSeek-Balance-Whale-Widget/",
+   "category": "ui",
+   "description": {
+    "en": "A fixed-corner whale widget for the DSH web GUI — balance, today's usage and per-turn cost with peak/off-peak pricing, editable balance-alert and daily-budget bubbles, a module-based custom bubble queue with A/B weighted choices and random lines or images, 30+ vendor templates (OpenAI, OpenRouter, Kimi, SiliconFlow, Ark, Zhipu, MiniMax and more) with per-model balance and subscription quota, plus ",
+    "zh": "右下角常驻的小鲸鱼挂件：余额、今日已用与每轮对话消耗（含峰谷价），余额预警与今日预算的泡泡内容都可编辑；泡泡点击序列模块化自定义，支持并列加权 A/B、随机台词与随机图片；内置 30+ 厂商模板（OpenAI / OpenRouter / Kimi / 硅基流动 / 方舟 / 智谱 / MiniMax 等），按模型查余额与订阅额度；另有任务结束音效、导入音频、自定义角色与资源管理。数据全在本机，无遥测。"
+   },
+   "npm": "dsh-whale-widget",
+   "version": "0.4.2",
+   "stars": 5002,
+   "downloads": 178376,
+   "downloadsStart": "2026-09-17",
+   "downloadsEnd": "2026-10-16",
+   "downloadsCheckedAt": "2026-10-17",
+   "capabilities": [
+    "shell",
+    "fs-write",
+    "fs-read",
+    "network",
+    "credentials",
+    "env"
+   ],
+   "capabilityRedLines": [
+    "reads credentials/secrets AND has network access",
+    "uses literal IP 100.100.100.200 for network access"
+   ],
+   "capabilityCheckedAt": "2026-10-17T09:55:28.306Z",
+   "install": "dsh plugin --profile web add dsh-whale-widget",
+   "added": "2026-08-23"
+  },
+  {
+   "name": "dsh-prompt-polish",
+   "owner": "benrong2048-boop",
+   "url": "https://github.com/benrong2048-boop/dsh-prompt-polish",
+   "page": "https://awesome-dsh-plugin.com/p/benrong2048-boop/dsh-prompt-polish/",
+   "category": "agi",
+   "description": {
+    "en": "Turns a one-line DSH draft into a complete task brief (role / goal / constraints / output format). The engine is a byte-verified port of linshenkx/prompt-optimizer (three modes, 10 templates identical to upstream); history is consent-gated with version chains and structural comparison; every run reports its token usage. Nothing is written back or sent without a click.",
+    "zh": "把 DSH 输入框里的一句话补成完整任务书（角色/目标/约束/输出格式）。引擎是 linshenkx/prompt-optimizer 的逐字节移植：三种优化模式、10 个模板与上游一致；历史为授权制、带版本链与结构对比；每次润色的 token 消耗可见。未经点击不写回、不发送。"
+   },
+   "npm": null,
+   "tarball": "https://github.com/benrong2048-boop/dsh-prompt-polish/releases/download/v0.2.4/benrong-dsh-prompt-polish-0.2.4.tgz",
+   "version": null,
+   "stars": 5,
+   "downloads": null,
+   "downloadsStart": null,
+   "downloadsEnd": null,
+   "downloadsCheckedAt": null,
+   "capabilities": [
+    "network",
+    "llm"
+   ],
+   "capabilityRedLines": [],
+   "capabilityCheckedAt": "2026-10-17T09:55:28.306Z",
+   "install": "dsh plugin --profile web add \"https://github.com/benrong2048-boop/dsh-prompt-polish/releases/download/v0.2.4/benrong-dsh-prompt-polish-0.2.4.tgz\"",
+   "added": "2026-10-13"
+  },
+  {
+   "name": "dsh-plugin#dsh-claude-code-web",
+   "owner": "zhoulvyuan",
+   "url": "https://github.com/zhoulvyuan/dsh-plugin/tree/master/dsh-claude-code-web",
+   "page": "https://awesome-dsh-plugin.com/p/zhoulvyuan/dsh-plugin--dsh-claude-code-web/",
+   "category": "agi",
+   "description": {
+    "en": "Embeds Claude Code as a workbench in DSH, serving an in-host HTTP/WebSocket backend with a sidebar entry and a draggable overlay panel.",
+    "zh": "在 DSH 内嵌入 Claude Code 工作台，由宿主内的 HTTP/WebSocket 服务驱动，提供侧边栏入口与可拖动的悬浮面板。"
+   },
+   "npm": null,
+   "version": null,
+   "stars": null,
+   "downloads": null,
+   "downloadsStart": null,
+   "downloadsEnd": null,
+   "downloadsCheckedAt": null,
+   "capabilities": [
+    "network",
+    "env"
+   ],
+   "capabilityRedLines": [],
+   "capabilityCheckedAt": "2026-10-17T09:55:28.306Z",
+   "install": "dsh plugin --profile web add github:zhoulvyuan/dsh-plugin#path:/dsh-claude-code-web",
+   "added": "2026-10-17"
+  },
+  {
+   "name": "deepseek-harness",
+   "owner": "deepseek-ai",
+   "url": "https://github.com/deepseek-ai/deepseek-harness",
+   "page": "https://awesome-dsh-plugin.com/p/deepseek-ai/deepseek-harness/",
+   "category": "agi",
+   "description": {
+    "en": "SYNTHETIC deny-list control entry (not present upstream).",
+    "zh": "合成条目：用于验证 denyRepos 的离线对照，上游并不存在。"
+   },
+   "npm": "deepseek-harness",
+   "version": "0.2.1-alpha.2",
+   "stars": 9999,
+   "downloads": 0,
+   "downloadsStart": null,
+   "downloadsEnd": null,
+   "downloadsCheckedAt": "2026-10-17",
+   "install": "dsh plugin --profile web add deepseek-harness",
+   "added": "2026-01-01",
+   "capabilities": [],
+   "capabilityRedLines": [],
+   "capabilityCheckedAt": "2026-10-17T00:00:00.000Z"
+  },
+  {
+   "name": "deepseek-harness-genui",
+   "owner": "pengyue-polaron",
+   "url": "https://github.com/pengyue-polaron/deepseek-harness-genui",
+   "page": "https://awesome-dsh-plugin.com/p/pengyue-polaron/deepseek-harness-genui/",
+   "category": "ui",
+   "description": {
+    "en": "Code-first React and TypeScript task apps rendered inline, in Canvas, full screen, or on localhost, with interaction state available to later agent turns and approval-gated MCP and API access.",
+    "zh": "Code-first React + TypeScript 任务应用，支持 Inline、Canvas、全屏与 localhost；交互状态可供 Agent 后续轮次读取，MCP 和 API 访问在用户授权后执行。"
+   },
+   "npm": "dsh-plugin-genui",
+   "version": "0.15.1",
+   "stars": 115,
+   "downloads": 1969,
+   "downloadsStart": "2026-09-17",
+   "downloadsEnd": "2026-10-16",
+   "downloadsCheckedAt": "2026-10-17",
+   "capabilities": [
+    "shell",
+    "fs-write",
+    "fs-read",
+    "network",
+    "env",
+    "host-runtime"
+   ],
+   "capabilityRedLines": [],
+   "capabilityCheckedAt": "2026-09-24T17:02:46.730Z",
+   "install": "dsh plugin --profile web add dsh-plugin-genui",
+   "added": "2026-08-16",
+   "screenshots": [
+    "https://raw.githubusercontent.com/pengyue-polaron/deepseek-harness-genui/HEAD/screenshots/en/code-path-canvas.jpg",
+    "https://raw.githubusercontent.com/pengyue-polaron/deepseek-harness-genui/HEAD/screenshots/en/code-path-inline.jpg",
+    "https://raw.githubusercontent.com/pengyue-polaron/deepseek-harness-genui/HEAD/screenshots/en/photosynthesis-explorer.jpg",
+    "https://raw.githubusercontent.com/pengyue-polaron/deepseek-harness-genui/HEAD/screenshots/en/calendar-planner.jpg",
+    "https://raw.githubusercontent.com/pengyue-polaron/deepseek-harness-genui/HEAD/screenshots/en/code-path-explorer.jpg"
+   ]
+  }
+ ]
+}

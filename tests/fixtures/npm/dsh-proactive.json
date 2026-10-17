@@ -1,0 +1,352 @@
+{
+ "name": "dsh-proactive",
+ "dist-tags": {
+  "latest": "0.3.1"
+ },
+ "time": {
+  "created": "2026-09-17T16:24:08.720Z",
+  "modified": "2026-10-09T17:59:34.797Z",
+  "0.1.0": "2026-09-17T16:24:09.072Z",
+  "0.2.0": "2026-09-22T07:04:54.251Z",
+  "0.2.1": "2026-09-23T13:49:06.180Z",
+  "0.2.2": "2026-09-27T07:35:57.337Z",
+  "0.2.3": "2026-10-03T17:44:32.169Z",
+  "0.2.4": "2026-10-09T07:38:45.015Z",
+  "0.3.0": "2026-10-09T16:32:25.035Z",
+  "0.3.1": "2026-10-09T17:59:34.598Z"
+ },
+ "versions": {
+  "0.1.0": {
+   "name": "dsh-proactive",
+   "version": "0.1.0",
+   "repository": {
+    "url": "git+https://github.com/john-walks-slow/dsh-proactive.git",
+    "type": "git",
+    "directory": "packages/dsh-proactive"
+   },
+   "engines": {
+    "node": ">=22.5"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "8b8c79e04169c99384cdc8926705ef55e7693f7b",
+    "tarball": "https://registry.npmjs.org/dsh-proactive/-/dsh-proactive-0.1.0.tgz",
+    "fileCount": 43,
+    "integrity": "sha512-pZarudYgCMEasJeisOhtVYulNgV4R189KfN7EuihzNLfqlo748mvFhsOj3KSLoW0lHvU4q5k0uBMJ4euWFh+Ag==",
+    "signatures": [
+     {
+      "sig": "MEQCIArqU6SpdDLarD2ZvYEVZWEteLyudkgsSjc2JUBkxjjRAiBXus8gIUDgcDHQbT4YaNP4IGR4edHTk1Kk2pQEZhJZzQ==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 476398
+   }
+  },
+  "0.2.0": {
+   "name": "dsh-proactive",
+   "version": "0.2.0",
+   "repository": {
+    "url": "git+https://github.com/john-walks-slow/dsh-proactive.git",
+    "type": "git",
+    "directory": "packages/dsh-proactive"
+   },
+   "engines": {
+    "node": ">=22.5"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "eadf2953956225f89ab1409e9979731241fb7dc8",
+    "tarball": "https://registry.npmjs.org/dsh-proactive/-/dsh-proactive-0.2.0.tgz",
+    "fileCount": 47,
+    "integrity": "sha512-zsGgOpwwA7RjyQU57fjECVHjeC+X6mxKKWURbxxnag8qqgYNs9x0DTLzKl9Rf3jG2mL128f12GNlgSi6QJde4g==",
+    "signatures": [
+     {
+      "sig": "MEUCIQDmPOKHRlHWOnQJSxp3ssKvE3U7RCwWXC51PlFUuJRKAQIgR3M2iyTfkR84hA0kBTk2NE6SBIK5u3f6ffY6tGR2feA=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEYCIQDIzi7PeAXb27KCDvo8C3pwn1VDBuRWtitO/d0vrVcN1AIhANe4H2mFcJDXZV3jw2HxmCsPs3UP7zD390+N0D9YwJ1g",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 838408
+   }
+  },
+  "0.2.1": {
+   "name": "dsh-proactive",
+   "version": "0.2.1",
+   "repository": {
+    "url": "git+https://github.com/john-walks-slow/dsh-proactive.git",
+    "type": "git",
+    "directory": "packages/dsh-proactive"
+   },
+   "engines": {
+    "node": ">=22.5"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "ceeac18b5571432641f6d75ac2f4bf63347a025b",
+    "tarball": "https://registry.npmjs.org/dsh-proactive/-/dsh-proactive-0.2.1.tgz",
+    "fileCount": 47,
+    "integrity": "sha512-41nlczxozKv1EE6k86QT6tWYvmCCUYq/NkUgNPQUw79WlLi7912fDIc2S3VCm35+Ye+bTE/Rz2WeK1RdBN0cbg==",
+    "signatures": [
+     {
+      "sig": "MEYCIQD3CB6Jz0LzW8W04bgisWt9iL8PI3FinFoHeUJ1O4gAfQIhANNG+tBdVWxoJ6c2kEourG4V0BzjbW+ADIj2KOmTPZZ9",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEQCIGB3ALBRphqyrQcvUVyQJKC5PgofttTYhvbQs5atCtl0AiBCa42tiFIlYNPdnQdY/VY1W8NpygRbVZ81xZS/8SeZDw==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 838784
+   }
+  },
+  "0.2.2": {
+   "name": "dsh-proactive",
+   "version": "0.2.2",
+   "repository": {
+    "url": "git+https://github.com/john-walks-slow/dsh-proactive.git",
+    "type": "git",
+    "directory": "packages/dsh-proactive"
+   },
+   "engines": {
+    "node": ">=22.5"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "8afc5a8a99fbf8afed33f2ccc52e50651cb665fb",
+    "tarball": "https://registry.npmjs.org/dsh-proactive/-/dsh-proactive-0.2.2.tgz",
+    "fileCount": 47,
+    "integrity": "sha512-zm1zG0dVS5shPOydbYEEanDPNxa77zSux9tXASIBm91eel4pPhLvq++wFVgs5gJ9u+r03iXmgJj0y3I/tm3O/Q==",
+    "signatures": [
+     {
+      "sig": "MEQCIHof6SajDMQ1hgIrS0nVlf7mGvA1wxtqH7yCmXNO1dZVAiBMhEgnGPtuIqcMHH0Jd3oNAY2SfZCVeFQ/tU2SiNjFxg==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEYCIQCc8zkdVmukE+WN6cviYIPQgxnYhObNPJzNm30NIf+uDQIhAN53lFyka+wQuOdPIjskuK3b8WNLkYYXh61tcTzFCxJ8",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 842264
+   }
+  },
+  "0.2.3": {
+   "name": "dsh-proactive",
+   "version": "0.2.3",
+   "repository": {
+    "url": "git+https://github.com/john-walks-slow/dsh-proactive.git",
+    "type": "git",
+    "directory": "packages/dsh-proactive"
+   },
+   "engines": {
+    "node": ">=22.5"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "d9e70d50320b7a4749ec4bbd812c642f409d72b4",
+    "tarball": "https://registry.npmjs.org/dsh-proactive/-/dsh-proactive-0.2.3.tgz",
+    "fileCount": 47,
+    "integrity": "sha512-qdDMEiF6wen+jSZAnHJZo5O+FSAXpiOBWr/CSZj7BCEmrdhNWl5SkKLbwUBVPxQLyl1SBRdiNcZ8qKXwsGhFNA==",
+    "signatures": [
+     {
+      "sig": "MEYCIQDVwk/46IJgnk55nem9Mk5elv+hm3671eDRMTzdgPCs+AIhAIlidcdVGUE7efsKcCJRc7X/QHufMtOJ/iH+Oiov7aBW",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEUCIQC2dycKm8uCLJn/QTirErYHiToUUgpxYrp7lQ1FUzbn7QIgX65tEmqYxjN606Ijbj8XjsaoM3eiUE9Q13aFKaBGKRU=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 848837
+   }
+  },
+  "0.2.4": {
+   "name": "dsh-proactive",
+   "version": "0.2.4",
+   "repository": {
+    "url": "git+https://github.com/john-walks-slow/dsh-proactive.git",
+    "type": "git",
+    "directory": "packages/dsh-proactive"
+   },
+   "engines": {
+    "node": ">=22.5"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "64a8b6127f01d618f5e66a64eb953e81c10c3e74",
+    "tarball": "https://registry.npmjs.org/dsh-proactive/-/dsh-proactive-0.2.4.tgz",
+    "fileCount": 47,
+    "integrity": "sha512-1mntNUDNLw91KyP2e9Lx9Ao4gVZe4QwfexI8njdRS4g+dV1VicsaUnqgP+75uanBksWprIeBjwfLva4027OH6g==",
+    "signatures": [
+     {
+      "sig": "MEQCIECnllYyQscBdNuwWYcgLR/jnrB1au7Z0B49Z2dF9RC4AiBJjqgHROgv920RxsLNMFUVGUYuiNHjRyBySHWMDlrnEQ==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEUCIC6VS8GZAU60XzPIu1wHkFm7xt2a+5i2gkE3ksVJ/6UdAiEA/CSgKkF9402I3qWQAYtD/q2qvJ7EJ9gBLbSTBzzu39M=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 838297
+   }
+  },
+  "0.3.0": {
+   "name": "dsh-proactive",
+   "version": "0.3.0",
+   "repository": {
+    "url": "git+https://github.com/john-walks-slow/dsh-proactive.git",
+    "type": "git",
+    "directory": "packages/dsh-proactive"
+   },
+   "engines": {
+    "node": ">=22.5"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "0d0e3853db0052f2fb00fc8dbb4a5777c8690096",
+    "tarball": "https://registry.npmjs.org/dsh-proactive/-/dsh-proactive-0.3.0.tgz",
+    "fileCount": 49,
+    "integrity": "sha512-rHysKK0xCdW8Sm4QjVEhUvPcjj6h4V81BFAHtc6DX/n6kRUXOTfjXQmhbWGl38jcyNSxln+lbCvB6A+Hwg/zsA==",
+    "signatures": [
+     {
+      "sig": "MEYCIQCdG0eyjnCnPsCOBNb1Sm/5zVQaZvhhMwlNqC5OLz/EQgIhAMrUqw5mNIVaMfjonSi/iw4E5AJ+HgbF0M0fhd2XVDhd",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEUCIQCnCF6gicM2kFhHUkhdmCEqQGaylBd4MxquMhV7AayvEQIgUuSks2OY2TOr5qVKSx9N3XNArl9+/TIjWOfX/Wu+d7s=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 875655
+   }
+  },
+  "0.3.1": {
+   "name": "dsh-proactive",
+   "version": "0.3.1",
+   "repository": {
+    "url": "git+https://github.com/john-walks-slow/dsh-proactive.git",
+    "type": "git",
+    "directory": "packages/dsh-proactive"
+   },
+   "engines": {
+    "node": ">=22.5"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "a2f133e30dae8e115cadc22d0bfa99a19634c2d1",
+    "tarball": "https://registry.npmjs.org/dsh-proactive/-/dsh-proactive-0.3.1.tgz",
+    "fileCount": 49,
+    "integrity": "sha512-nl/AXKhXm3OJKELFotcs0xDyDhHk4DYevBI0ifzBnR1qoOHd405xIPvkXcb2HuZEOGOoSpaWF2EgPFDRnpmn6A==",
+    "signatures": [
+     {
+      "sig": "MEYCIQCJcXq0aE52YVBRr9uwQBNZl0wVDBP66GQnDQ9U7EE7dQIhAJ5bI42v43SA0WCywzu2NFVnToEFC025A9vRgw2yzOp1",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U",
+      "sig": "MEUCIC5G9m7javbp1aihecWspobVAVRNucN3LxOqkcC9v7pkAiEAgpHvGvgpzJbb5QURvHaW0P76/eOPbwj1tDM3Ifa3A3s="
+     }
+    ],
+    "unpackedSize": 879349
+   }
+  }
+ }
+}

@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# pnpm store, when it is configured inside the project.
+.pnpm-store/
+
+# Build output. Published to GitHub Pages from a CI artifact, never committed.
+dist/
+
+# The Git-resolution cache: per-run, environment-specific, and large.
+# Snapshot policy for committed upstream fixtures is a separate decision the
+# maintainers own, so nothing under data/ is ignored except this cache file.
+data/resolve-cache.json
+
+# TypeScript incremental build state
+*.tsbuildinfo
+
+# Logs
+*.log
+
+# OS noise
+.DS_Store
+
+# pnpm-lock.yaml is intentionally NOT ignored: CI installs with
+# --frozen-lockfile, so the lockfile must be committed.

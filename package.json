@@ -1,0 +1,42 @@
+{
+  "name": "dsh-discover-index",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Aggregate DSH plugin catalogs into a plugin-market index format 1 document for the DeepSeek Harness Discover tab",
+  "homepage": "https://github.com/hytime/dsh-discover-index",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hytime/dsh-discover-index.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@11.7.0",
+  "bin": {
+    "dsh-discover-index": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev": "tsx src/cli.ts",
+    "index": "pnpm run build --silent && node dist/cli.js build",
+    "doctor": "pnpm run build --silent && node dist/cli.js doctor"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-plugin-market-index": "^0.2.1-alpha.4",
+    "js-yaml": "^4.1.0",
+    "semver": "^7.6.3"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.7.0",
+    "@types/semver": "^7.5.8",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.1"
+  }
+}

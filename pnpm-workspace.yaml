@@ -1,0 +1,20 @@
+allowBuilds:
+  esbuild: set this to true or false
+# pnpm configuration.
+#
+# This file exists for exactly one reason: pnpm 10 and later no longer read the
+# `pnpm` field of package.json. The field is still accepted, still warned
+# about, and silently ignored — so build-script approval has to live here or it
+# does nothing at all.
+#
+# That matters for one dependency. esbuild ships a platform binary through a
+# postinstall script, and vitest cannot transform TypeScript without it. The
+# symptom of getting this wrong is not an install error: it is a test run that
+# dies inside the transform step, which reads like a broken test suite.
+#
+# The list is an allowlist, not a convenience. Approving a build script means
+# letting that package execute arbitrary code at install time, so a new entry
+# should be a deliberate decision with a reason, not a reflex reaction to a
+# pnpm warning.
+onlyBuiltDependencies:
+  - esbuild

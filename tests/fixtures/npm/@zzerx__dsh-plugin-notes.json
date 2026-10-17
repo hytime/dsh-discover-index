@@ -1,0 +1,440 @@
+{
+ "name": "@zzerx/dsh-plugin-notes",
+ "dist-tags": {
+  "latest": "0.4.3"
+ },
+ "time": {
+  "created": "2026-09-15T02:00:24.622Z",
+  "modified": "2026-10-08T05:54:38.746Z",
+  "0.1.0": "2026-09-15T02:00:24.978Z",
+  "0.2.1": "2026-09-15T06:45:05.807Z",
+  "0.2.2": "2026-09-15T10:06:44.099Z",
+  "0.2.4": "2026-09-19T16:59:22.602Z",
+  "0.3.0": "2026-09-20T09:10:01.690Z",
+  "0.3.1": "2026-09-21T03:09:38.006Z",
+  "0.3.2": "2026-09-22T05:41:08.983Z",
+  "0.3.3": "2026-09-22T05:51:06.993Z",
+  "0.4.0": "2026-09-23T09:51:59.183Z",
+  "0.4.1": "2026-09-28T01:26:53.127Z",
+  "0.4.2": "2026-09-29T08:35:25.495Z",
+  "0.4.3": "2026-10-08T05:54:38.591Z"
+ },
+ "versions": {
+  "0.1.0": {
+   "name": "@zzerx/dsh-plugin-notes",
+   "version": "0.1.0",
+   "repository": {
+    "url": "git+https://github.com/0x7A7A6572/dsh-forge-studio.git",
+    "type": "git",
+    "directory": "packages/plugin-notes"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "64ca6ff0a06d4c5c2df3c2d487c1dd2c548da916",
+    "tarball": "https://registry.npmjs.org/@zzerx/dsh-plugin-notes/-/dsh-plugin-notes-0.1.0.tgz",
+    "fileCount": 63,
+    "integrity": "sha512-flGBhKUJD1fXZpiSd8z/cuqAbirWKWFxV6wA0AHL+wjwC35rtz9mxan6J7XUb7RpELUVJrFlAn0LCs5gkAkGzA==",
+    "signatures": [
+     {
+      "sig": "MEYCIQDkzPDN0q1z5J2wXnMQIPVT3QGYtksRzJK7CT7oaMpkwwIhALusitCYPHsWg4Z7qtOFsBxUjJ9PDBN8uPkTzoM0W3Ln",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 1802513
+   }
+  },
+  "0.2.1": {
+   "name": "@zzerx/dsh-plugin-notes",
+   "version": "0.2.1",
+   "repository": {
+    "url": "git+https://github.com/0x7A7A6572/dsh-forge-studio.git",
+    "type": "git",
+    "directory": "packages/plugin-notes"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "e50e54c1de8578d6b307393607f582767ecd2d6b",
+    "tarball": "https://registry.npmjs.org/@zzerx/dsh-plugin-notes/-/dsh-plugin-notes-0.2.1.tgz",
+    "fileCount": 63,
+    "integrity": "sha512-xuoz6lxlTxtX8DoVgJaawlOZZgGy7XwxuJgVIVXRR1WmeBpFc/Z7GEJtacsx0myQs9jS3XrAjDybyDSm+qYUBA==",
+    "signatures": [
+     {
+      "sig": "MEQCIBDTJF6gB8qZI7gKRrH3ZYSLGf00EzfV2mBy26kyzI8VAiAOs0OyIrZCe8i/Fhjzzweuzy4GfLDciCBF6wliSQ3F7w==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEYCIQDXLi1Knbtrqs7IfeopQBqAjgMT+Ud3hw+dsyvOTyjTGAIhAONKPKxyjFhcZSZORR2bGSpifxnnKwJjN7o1Kg83C0/+",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 1802426
+   }
+  },
+  "0.2.2": {
+   "name": "@zzerx/dsh-plugin-notes",
+   "version": "0.2.2",
+   "repository": {
+    "url": "git+https://github.com/0x7A7A6572/dsh-forge-studio.git",
+    "type": "git",
+    "directory": "packages/plugin-notes"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "d03fc310d41b57c345d768b4a643a0a7d104d784",
+    "tarball": "https://registry.npmjs.org/@zzerx/dsh-plugin-notes/-/dsh-plugin-notes-0.2.2.tgz",
+    "fileCount": 63,
+    "integrity": "sha512-1cjziBvn9IvueVp2ty+6CxpTatAxrXVjPcPLkJob71GdAhm1DbEajoN7C0oct20am/m3ZLkw+4U64c0WorC86g==",
+    "signatures": [
+     {
+      "sig": "MEQCIH+B1EqeAb+70v+xwlaVM2aj0xIISjTp3MDwaiqDSHyZAiACCp3wneHqz1w2/qu6CV5SBIDHF1YA+QDPBRLRESuGVg==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEUCIQCSK7VNF+lQpPxIUDt0lq3DCHLeDeCho48nyu0n8VwuswIgNxoXCK37N8m5t+BdNSRU7pCHLYqxrkG+q/3xmAtcgGw=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 1796368
+   }
+  },
+  "0.2.4": {
+   "name": "@zzerx/dsh-plugin-notes",
+   "version": "0.2.4",
+   "repository": {
+    "url": "git+https://github.com/0x7A7A6572/dsh-forge-studio.git",
+    "type": "git",
+    "directory": "packages/plugin-notes"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "68eb2d120368ad9aa8bfd61d36edd722126154bd",
+    "tarball": "https://registry.npmjs.org/@zzerx/dsh-plugin-notes/-/dsh-plugin-notes-0.2.4.tgz",
+    "fileCount": 63,
+    "integrity": "sha512-p42Cmo3NsHGabA2BJ+35jJ20FN21qSKChJAlf4sC9sjvHk9pJP2xWSSmZSbNQ7xszNgtmh36hp1F2QKEsTRZGg==",
+    "signatures": [
+     {
+      "sig": "MEQCIFoWyJm0UJVIlij3etFcHEulS8kSuZSrwJlb90oR3xo5AiATDXN5tukqZUDqMqma4olm8hjsocQEFDJWPmlo0jsZHA==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEUCIQDxQD6fXdr7evtsRi2ftaY7qa2gK28QOu3nG/5rhcgd9wIgJEOs9HHNLSseS3Cq2zJ+hybgISIfOknVSp5WQXFSoVM=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 1799105
+   }
+  },
+  "0.3.0": {
+   "name": "@zzerx/dsh-plugin-notes",
+   "version": "0.3.0",
+   "repository": {
+    "url": "git+https://github.com/0x7A7A6572/dsh-forge-studio.git",
+    "type": "git",
+    "directory": "packages/plugin-notes"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "1980f0920f2289e41920c5f7ded166f9cc94deb4",
+    "tarball": "https://registry.npmjs.org/@zzerx/dsh-plugin-notes/-/dsh-plugin-notes-0.3.0.tgz",
+    "fileCount": 80,
+    "integrity": "sha512-AkCwuoRM1d0TFKyuuHEyFkwxW1iowJyV+1tkN52JAExHCT6AgbISbnAnXyDansFzSeq/qRrvK+Dm/g98VD6T6g==",
+    "signatures": [
+     {
+      "sig": "MEUCIQCFhyCuas0MjcE6sKt7Ku8X+PS6FbBMHOBsgTnAxfJkJgIgXRMcStWcoDGHuRRiM1nkctup1fxQniSiHnOkj2bIEBA=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEQCIGY18mknL/bGNSnjsaxZcpxEq9TxWXYMHNts2la6qmmyAiBfZ8myY7JGyjwI2x3h5tG5z66GtdK1F8P3M42h+jyrPQ==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 1349733
+   }
+  },
+  "0.3.1": {
+   "name": "@zzerx/dsh-plugin-notes",
+   "version": "0.3.1",
+   "repository": {
+    "url": "git+https://github.com/0x7A7A6572/dsh-forge-studio.git",
+    "type": "git",
+    "directory": "packages/plugin-notes"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "c67ce91ae9036bf8bf13c046048b3e1eac4ab692",
+    "tarball": "https://registry.npmjs.org/@zzerx/dsh-plugin-notes/-/dsh-plugin-notes-0.3.1.tgz",
+    "fileCount": 81,
+    "integrity": "sha512-V0+j2P6K8F6kJyZdds6uAxK41Bn5uW6qFB8dBpvZ6SP1D8wO9zOvXyJjFWnRnVcchrsq4+19cgpOaFTWHzLOsw==",
+    "signatures": [
+     {
+      "sig": "MEUCIALt4BarJ4CGCTUIXKVYE6JYkMv0LQ49ckzTGtM8NbBiAiEAohwYa0Meb+rkcGbfNoia7ReC5rsviU9UvVLBpqQveS8=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEUCIG2h7Y2gL4Q0JKZDZdBqvwu1B/DB/R2wxP+PMN02mkbTAiEAgovKoDCnXtyhklEY1GDlYvQI4Wnvml10VqW6PcdA6KY=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 1351370
+   }
+  },
+  "0.3.2": {
+   "name": "@zzerx/dsh-plugin-notes",
+   "version": "0.3.2",
+   "repository": {
+    "url": "git+https://github.com/0x7A7A6572/dsh-forge-studio.git",
+    "type": "git",
+    "directory": "packages/plugin-notes"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "e5fcf9f1b8ca8e1d55149af7fe997fa8caee6627",
+    "tarball": "https://registry.npmjs.org/@zzerx/dsh-plugin-notes/-/dsh-plugin-notes-0.3.2.tgz",
+    "fileCount": 81,
+    "integrity": "sha512-Um2dHEv7WQSlxhtfalAN4wFlBnPK9z2cQJM00Uc6xDBcEB+dl5KHJB6eIosEydhmNTrydGc+D3CGYDfKgQuT7Q==",
+    "signatures": [
+     {
+      "sig": "MEUCIQDfhMYGbGFsuQoqyLw9ox2ms1Aws7gQ6rU/scFLxbDLxAIgHPYqm5Sb7B7bHtUPHauUUz/hyf6j6i3HOkZrLOt1KFA=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEUCIHx/qfRuwe7Hyf7QxVpKZkAy3HzOiinLcjK/K9UZ3zkZAiEA8++ZMSgWYeSkc0XQJmH7uMiGu/dKdG84WHyxnPy4qmw=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 1351612
+   }
+  },
+  "0.3.3": {
+   "name": "@zzerx/dsh-plugin-notes",
+   "version": "0.3.3",
+   "repository": {
+    "url": "git+https://github.com/0x7A7A6572/dsh-forge-studio.git",
+    "type": "git",
+    "directory": "packages/plugin-notes"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "440eeb2aeb0a51260f83bb7682a57ac47e9888c3",
+    "tarball": "https://registry.npmjs.org/@zzerx/dsh-plugin-notes/-/dsh-plugin-notes-0.3.3.tgz",
+    "fileCount": 81,
+    "integrity": "sha512-kJhiRhDNkWyRZ3d6ZvgaBCMjUZY7AcPAWam/OVVK7DY/GkbrVsQbrR/zj54segAuR38QPiLBAdSa5S179qnRYw==",
+    "signatures": [
+     {
+      "sig": "MEQCIFcxGNqcaMEu/xhb4okCblDjUZk6pncytnLM0yc112emAiAd2bIoEcRoEiNW+BOwhL8qPr5FQ3jcVMMdRu4FC4pFgw==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEYCIQDLsXGdEBYHCMT6chsNDkGTNq7Sl5KZhu+oXg3f2B2+lAIhANbjatswmKWw4yq9Er1U2HDm3rOfYkLJVLDP2V7PAdek",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 1349112
+   }
+  },
+  "0.4.0": {
+   "name": "@zzerx/dsh-plugin-notes",
+   "version": "0.4.0",
+   "repository": {
+    "url": "git+https://github.com/0x7A7A6572/dsh-forge-studio.git",
+    "type": "git",
+    "directory": "packages/plugin-notes"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "8c9f1c9aca1f878f5867f54c8a3af3f2ac0750b7",
+    "tarball": "https://registry.npmjs.org/@zzerx/dsh-plugin-notes/-/dsh-plugin-notes-0.4.0.tgz",
+    "fileCount": 81,
+    "integrity": "sha512-UyGbPMB3Pm7cLdY9OQ7JCByQn9F3s6DcuGOVn4HgdXXMixCuij8MP7jBWDuW7JnuFoKuHk92CI4L+u7kbMdrnw==",
+    "signatures": [
+     {
+      "sig": "MEUCIQCTt3QlZt4VK3M7FEjtJQ3GxHo1LWcLOZ/XrgwmOohp9wIgOySrGEPGnJJZQsC3dLlh/4XvToIjrnPy543uK7dYgfI=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEQCICnyGL9Ub7pHqMldi17Afs59UFp0G77Lf9uC91FoI235AiBGVA2Jm3z1TAfDggiWkrJkSmyZdypCoBLjNGzeUUrF6w==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 1375328
+   }
+  },
+  "0.4.1": {
+   "name": "@zzerx/dsh-plugin-notes",
+   "version": "0.4.1",
+   "repository": {
+    "url": "git+https://github.com/0x7A7A6572/dsh-forge-studio.git",
+    "type": "git",
+    "directory": "packages/plugin-notes"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "5729dca52c057df41aee47e219b5dff6debac6ab",
+    "tarball": "https://registry.npmjs.org/@zzerx/dsh-plugin-notes/-/dsh-plugin-notes-0.4.1.tgz",
+    "fileCount": 82,
+    "integrity": "sha512-oywN5VbmHyoqJ/lQaZMCsolQbe803aG4y1IEMSuEeqUT7zzb1CdgyoyBon9cFN6lO+MQUiG8VdAgnOZuVQA2Ew==",
+    "signatures": [
+     {
+      "sig": "MEUCIGKxqodCZc926/r+HaSH2YAgAJR9bOB9cvXGDRQUAM0IAiEAq0T1UNsIR7i3P5gaByZ1KG85QyA1AUNVNGv57XjD8mY=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEYCIQDAFbE5DOe9sn77Fwz6oSdeLs/LKF1CVO3GZp4I+XR+YgIhANNRMYLII+v40But8gdUyjD84bx9g/zw7v6iFT1loc/M",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 1385150
+   }
+  },
+  "0.4.2": {
+   "name": "@zzerx/dsh-plugin-notes",
+   "version": "0.4.2",
+   "repository": {
+    "url": "git+https://github.com/0x7A7A6572/dsh-forge-studio.git",
+    "type": "git",
+    "directory": "packages/plugin-notes"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "3228ca9ba3699124d73fb67c3681db139587a2f8",
+    "tarball": "https://registry.npmjs.org/@zzerx/dsh-plugin-notes/-/dsh-plugin-notes-0.4.2.tgz",
+    "fileCount": 84,
+    "integrity": "sha512-2vsz6QdzU6JiuI+WLEZiRDoQGHp8gwJtzb6vvAh/0e9r8S8MVP8e4xv5wQ6WIGtrURJ6LBQbgfbXq5ZAHH2QDw==",
+    "signatures": [
+     {
+      "sig": "MEYCIQD2dVuopSCIS4B2DOxcg9n4TVtvx9Y2mZxg/RyP6aGtQAIhAP8UBgaDWCrWaQUdZ3iAYgAL2ngYGoQUXOGx24RCqllq",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEQCIGXm3sSKZAsEzYyZPnBSzXLgXhk1emfjzb7lZfyi+MRjAiBkFpCTJ3ZuERnB7SspgGPQ+vX88D3E+Zl+3WKb3Jt6ZA==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 1388306
+   }
+  },
+  "0.4.3": {
+   "name": "@zzerx/dsh-plugin-notes",
+   "version": "0.4.3",
+   "repository": {
+    "url": "git+https://github.com/0x7A7A6572/dsh-forge-studio.git",
+    "type": "git",
+    "directory": "packages/plugin-notes"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "f058027517e7c218a43e6e4f3ac13bac6843cd4b",
+    "tarball": "https://registry.npmjs.org/@zzerx/dsh-plugin-notes/-/dsh-plugin-notes-0.4.3.tgz",
+    "fileCount": 84,
+    "integrity": "sha512-58nA68ApaPpTA3sRhnHM5x7f++WcbKklIYOpMdmyvMP90ARdGlTvxCWsnQufr4ZejBs0REYB0x2Ia3nTpqmssQ==",
+    "signatures": [
+     {
+      "sig": "MEUCIQDkxHZuAnihkI6Ag4g1qta2MI6JOu7+lRI+bqm7ZqSxgwIgJNNy5dZHAmjYCuQ+phEpb2cQ0KvKx7cvCbt3ZZUtsEQ=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U",
+      "sig": "MEYCIQCtjIU4hNmYzPo/M2N74kEdI73S5I2eD+lbIJ0QpLYMmwIhAL00sA3B1gcVbqBBN93VeENmKu9LzTLGD5NVVDH4NGpl"
+     }
+    ],
+    "unpackedSize": 1326549
+   }
+  }
+ }
+}

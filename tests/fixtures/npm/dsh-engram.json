@@ -1,0 +1,421 @@
+{
+ "name": "dsh-engram",
+ "dist-tags": {
+  "latest": "0.5.0"
+ },
+ "time": {
+  "created": "2026-08-20T10:58:07.313Z",
+  "modified": "2026-10-15T09:23:54.332Z",
+  "0.2.0": "2026-08-20T10:58:07.616Z",
+  "0.3.0": "2026-08-24T02:25:49.579Z",
+  "0.3.2": "2026-08-24T06:46:39.706Z",
+  "0.3.3": "2026-08-25T05:31:46.828Z",
+  "0.3.4": "2026-08-27T02:38:08.369Z",
+  "0.3.5": "2026-08-28T09:38:30.610Z",
+  "0.3.6": "2026-09-09T01:35:29.066Z",
+  "0.3.7": "2026-09-11T02:30:17.814Z",
+  "0.4.0": "2026-09-14T10:06:49.064Z",
+  "0.5.0": "2026-10-15T09:23:54.117Z"
+ },
+ "versions": {
+  "0.2.0": {
+   "name": "dsh-engram",
+   "version": "0.2.0",
+   "repository": {
+    "url": "git+https://github.com/skepsun/dsh-engram.git",
+    "type": "git"
+   },
+   "engines": {
+    "node": ">=22.19.0"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "b675020d3d97e8a99980f735bda9ce1db71a1923",
+    "tarball": "https://registry.npmjs.org/dsh-engram/-/dsh-engram-0.2.0.tgz",
+    "fileCount": 15,
+    "integrity": "sha512-gy8HXGhmyaimxevEvdj8CDYvmTEzmKdsk+POaHGqZGcEw1DYogDvgxNb1pflE+95XHKKvaT9k9CLYvQPgWOvcw==",
+    "signatures": [
+     {
+      "sig": "MEUCIAYBE9npEYVwvZvjQoy8+RL5zkUBGZrvniHQ6HbjfGD0AiEAihGQk0UNe6pB1EFNqlI5N/xTQdyoN3v43skCF/vS5ig=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 212818
+   }
+  },
+  "0.3.0": {
+   "name": "dsh-engram",
+   "version": "0.3.0",
+   "repository": {
+    "url": "git+https://github.com/skepsun/dsh-engram.git",
+    "type": "git"
+   },
+   "engines": {
+    "node": ">=22.19.0"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "2a892f5bd6c45c40a7b60fb5f1c5c8f11b230241",
+    "tarball": "https://registry.npmjs.org/dsh-engram/-/dsh-engram-0.3.0.tgz",
+    "fileCount": 18,
+    "integrity": "sha512-gjP7pgSik+H3xTuMzekGBJINCeBdnz3f7QQdmNEiVsIljkdsFSSb967LCeMAOrQ33axGJPHbwUnnnhG07YJhdQ==",
+    "signatures": [
+     {
+      "sig": "MEYCIQDknsBAMXaD+Y2j9dujBbp32AImupA6GKnpXNR7AMSGLAIhAPcX2KzrAKc8zAa7s2eBcJWr1FV2hvk1Dh83bAcQCZ1t",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 470021
+   }
+  },
+  "0.3.2": {
+   "name": "dsh-engram",
+   "version": "0.3.2",
+   "repository": {
+    "url": "git+https://github.com/skepsun/dsh-engram.git",
+    "type": "git"
+   },
+   "engines": {
+    "node": ">=22.19.0"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "7e7d6052c978738d521676c8183e618c23472c87",
+    "tarball": "https://registry.npmjs.org/dsh-engram/-/dsh-engram-0.3.2.tgz",
+    "fileCount": 19,
+    "integrity": "sha512-5XL+ehfovZZUh2zei+iCeczjoTWEJvbjNqJ2MQtHtbmChJ0onQBH1bgiHtnAlovQR0/fAmvKDJtiQOLJ72hNqw==",
+    "signatures": [
+     {
+      "sig": "MEQCIEZqv/3w7Jgj7/hR1YigFjjFsUFZz0nQwfUb75tQsOOdAiAMDSN9WTKgd+3p1UReH0ZhZzG/D0uL1xsG0dVZD7YYvQ==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 498702
+   }
+  },
+  "0.3.3": {
+   "name": "dsh-engram",
+   "version": "0.3.3",
+   "repository": {
+    "url": "git+https://github.com/skepsun/dsh-engram.git",
+    "type": "git"
+   },
+   "engines": {
+    "node": ">=22.19.0"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "32a7781a685a3a541fa9d81da383c3cec1e84f54",
+    "tarball": "https://registry.npmjs.org/dsh-engram/-/dsh-engram-0.3.3.tgz",
+    "fileCount": 21,
+    "integrity": "sha512-PbRuZ5/SRUBeTh9Xo4yPcSVuXlFfXcVvb6RsawUvUIChFkwiKgDY3FaBc5BJkqXoM5T3qUE6qBzOPnRHBDz3jQ==",
+    "signatures": [
+     {
+      "sig": "MEQCIAjjzRcbzca6W9f/4dha7OvQyTmcTIsae3xgoCYVOfc6AiBAZSiW6RQGKj66yTQY8FbiieoCTRgMq0adwZ7FLh0fhw==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 552692
+   }
+  },
+  "0.3.4": {
+   "name": "dsh-engram",
+   "version": "0.3.4",
+   "repository": {
+    "url": "git+https://github.com/skepsun/dsh-engram.git",
+    "type": "git"
+   },
+   "engines": {
+    "node": ">=22.19.0"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "1629f0ad0adb082a266160e23a8499cd99e989b3",
+    "tarball": "https://registry.npmjs.org/dsh-engram/-/dsh-engram-0.3.4.tgz",
+    "fileCount": 22,
+    "integrity": "sha512-w0VkC+5lvLevKOCVtS7CaBSQe2aqyBeF0LpcqHUcsHj8BlMBYhSeeFSND16zrSVBjY00svNnuUV+YNF1mquWww==",
+    "signatures": [
+     {
+      "sig": "MEQCIG4YG1tVXUaUDuPN6pBUKGN43TvEXTmylRTNqJzOcBlgAiACZVtzOLHCAhdI7whEERWroSf8YwS/Jilz/gbSzyewgw==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 553718
+   }
+  },
+  "0.3.5": {
+   "name": "dsh-engram",
+   "version": "0.3.5",
+   "repository": {
+    "url": "git+https://github.com/skepsun/dsh-engram.git",
+    "type": "git"
+   },
+   "engines": {
+    "node": ">=22.19.0"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "702f80a76bbe7077168868954bd3b38836da315d",
+    "tarball": "https://registry.npmjs.org/dsh-engram/-/dsh-engram-0.3.5.tgz",
+    "fileCount": 38,
+    "integrity": "sha512-ra+dTx7Voe5y38kCt6pMvUIqKlnpWzkVU4s3EzGy7AYYnWQRvW2saVknCGtNlW+7sM5EUdjQs6Pm/3BC2Xd4Fg==",
+    "signatures": [
+     {
+      "sig": "MEUCIBwJq7/CBV7hXICJMShmP0ATWcg566X9gssGsw4ljPhxAiEAu1ToQNczxVIX3GX3CP0rkNBUbUWp0QibcUuFXaZJXL8=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEQCID62ZLUr+nU4rFGVkwHXBBJrk21AygbHbPjBoCLx3VPfAiApgYSv9uL4RTlh2kjlmZJQzeqBOvUpEnysJV0ZAGGJMQ==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 731211
+   }
+  },
+  "0.3.6": {
+   "name": "dsh-engram",
+   "version": "0.3.6",
+   "repository": {
+    "url": "git+https://github.com/skepsun/dsh-engram.git",
+    "type": "git"
+   },
+   "engines": {
+    "node": ">=22.19.0"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-runtime",
+      "@deepseek-ai/dsh-client-connection",
+      "@deepseek-ai/dsh-client-ui-settings"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "b93806839082bf71fa6230bc9de48841afb56d5b",
+    "tarball": "https://registry.npmjs.org/dsh-engram/-/dsh-engram-0.3.6.tgz",
+    "fileCount": 38,
+    "integrity": "sha512-CZPq67ahs9ihmEgTCRbqyt/1Spb28k5CYic1FCfIqI7flUamS1tgmEkZR3i/xWnAjNVV+1OZRp/Somt6HS24cQ==",
+    "signatures": [
+     {
+      "sig": "MEQCIHIHB5DuYGG5w+5bFvfv4PIobTumpmp/HaT9xapGoOa/AiB5h0dkOoYoEyGjhQWIDG8fL5A1OYC61s2qzlhGYQWWZg==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEQCIAM/dHIahKEiCCzsmBsz+bla8pZe7mUtCISXsFg3u8d0AiAunrRp2SEoNqQ21QfeBu8jGe3FuzHX/ToN6ZNa6mArUA==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 778909
+   }
+  },
+  "0.3.7": {
+   "name": "dsh-engram",
+   "version": "0.3.7",
+   "repository": {
+    "url": "git+https://github.com/skepsun/dsh-engram.git",
+    "type": "git"
+   },
+   "engines": {
+    "dsh": ">=0.1.2-alpha.2 <0.2.0-0",
+    "node": ">=22.19.0"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-locale",
+      "@deepseek-ai/dsh-client-ui-conversation",
+      "@deepseek-ai/dsh-client-ui-renderer",
+      "@deepseek-ai/dsh-client-ui-settings",
+      "@deepseek-ai/dsh-client-ui-settings-plugins"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "6592cc356bb96ab781ba9f93c0e69130795329d4",
+    "tarball": "https://registry.npmjs.org/dsh-engram/-/dsh-engram-0.3.7.tgz",
+    "fileCount": 40,
+    "integrity": "sha512-Tq1FCL9Imn46O2J9uh5G7397pkTPZzdOVsHEznIg/DisP2v+RCNID9VBQd0b2NOT2/c5lCExh9zYcMBY+XsjBA==",
+    "signatures": [
+     {
+      "sig": "MEQCICriN4jPEIWtkcFcvZ8bR4KXgJ87YoGcZMBcC5mogRGIAiB1m3EvN+tlFTLkshJXDuimvU+Q/Tb+GozDJcCPpSXWpQ==",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEUCIQDeB0Jv9hN8PMEOLvUHOSUDpKKZXnOi1Qm9ZXSqNIXFIAIgE4eA1XsmgZZJn+n7ZBFkGkYmpDi2eov/L1y/YAd2NDg=",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 795768
+   }
+  },
+  "0.4.0": {
+   "name": "dsh-engram",
+   "version": "0.4.0",
+   "repository": {
+    "url": "git+https://github.com/skepsun/dsh-engram.git",
+    "type": "git"
+   },
+   "engines": {
+    "dsh": ">=0.1.2-alpha.2 <0.2.0-0",
+    "node": ">=22.19.0"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-locale",
+      "@deepseek-ai/dsh-client-ui-conversation",
+      "@deepseek-ai/dsh-client-ui-renderer",
+      "@deepseek-ai/dsh-client-ui-settings",
+      "@deepseek-ai/dsh-client-ui-settings-plugins"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "37ffea12c3a2ebdb894240f1098ad051a49ec95a",
+    "tarball": "https://registry.npmjs.org/dsh-engram/-/dsh-engram-0.4.0.tgz",
+    "fileCount": 44,
+    "integrity": "sha512-UCj678JgZm6uXFeoyl5abJ2jiMtsmh+6+WEKz7X6nOVVv8wlI/Uat7A9jhOu325vPLZbblqCPHfWTeGgBEncFQ==",
+    "signatures": [
+     {
+      "sig": "MEYCIQD7hexYVeH73B5/sKt96Xy0hpYm7Cj/gfaWov0QAnPMtAIhAKHuJn3n2OBBNU2QCU/gWp1lZkHRABe6d9+Ew38kqB/Z",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "sig": "MEYCIQDft9SOEwVt8hTN+bqV/3HSQSwJFA698sqOTAsyHJdXywIhAJWl4A/PvaSfG0MzZyqV7Z0HJMt6uRr+nKHHnqfkoYnu",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     }
+    ],
+    "unpackedSize": 829408
+   }
+  },
+  "0.5.0": {
+   "name": "dsh-engram",
+   "version": "0.5.0",
+   "repository": {
+    "url": "git+https://github.com/skepsun/dsh-engram.git",
+    "type": "git"
+   },
+   "engines": {
+    "dsh": ">=0.1.2-alpha.2 <0.3.0-0",
+    "node": ">=22.19.0"
+   },
+   "dsh": {
+    "bundle": {
+     "patch": "./cordis.patch.yml"
+    },
+    "client": {
+     "inject": [
+      "@deepseek-ai/dsh-client-locale",
+      "@deepseek-ai/dsh-client-ui-conversation",
+      "@deepseek-ai/dsh-client-ui-renderer",
+      "@deepseek-ai/dsh-client-ui-settings",
+      "@deepseek-ai/dsh-client-ui-settings-plugins"
+     ],
+     "platform": "web"
+    }
+   },
+   "dist": {
+    "shasum": "7d365238230a29d6afee2295d3de5b5ba0e1b187",
+    "tarball": "https://registry.npmjs.org/dsh-engram/-/dsh-engram-0.5.0.tgz",
+    "fileCount": 48,
+    "integrity": "sha512-CaxWR9HUen8sDCD+YwE0gaeAGZGs/bvoNnHZWg+Mz42llQYx3dxXex1auC6r5wopH1RUEezV+bgUTEMA47Agrw==",
+    "signatures": [
+     {
+      "sig": "MEYCIQCQQ1uVe/o+TD4GAJZZAkARMhJM6oQkB95KGtaT0Y0qagIhAII5XbXG7Cc2xIhR6MspCp3F+l2HkjbZ96il5Cz9eryS",
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+     },
+     {
+      "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U",
+      "sig": "MEUCIH89qxmd9V4HvjNfTXIXVppEraS8uBQvzHKHlpeVeAkiAiEAtxxZtZpgLAA3dGOqpAed0O49Qwk1WRF/n63UuVb1TBk="
+     }
+    ],
+    "unpackedSize": 904199
+   }
+  }
+ }
+}

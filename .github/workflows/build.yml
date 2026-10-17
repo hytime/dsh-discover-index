@@ -1,0 +1,146 @@
+name: Build and deploy index
+
+# Publishes the aggregated market index to GitHub Pages.
+#
+# The ordering of the steps below is the whole safety property of this workflow:
+# the produced document is validated with the real validator package (the same
+# one DSH's Discover tab uses) BEFORE the artifact is uploaded, and the deploy
+# job only starts once the build job succeeded. A run that cannot produce a
+# valid index fails without touching the currently published one, so the last
+# good index stays live.
+
+on:
+  schedule:
+    # Daily at 06:17 UTC. The odd minute avoids the top-of-hour congestion that
+    # GitHub-hosted cron shares with every other scheduled workflow.
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+# A new run supersedes an in-flight one: a stale index must never be deployed
+# after a newer one, and there is no reason to spend two runners on it.
+concurrency:
+  group: pages-index
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # pnpm/action-setup must run BEFORE actions/setup-node: setup-node's
+      # `cache: pnpm` shells out to the pnpm binary to locate the store.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The git-resolution cache: one entry per repository whose package name
+      # and version had to be read from its manifest. Without it every run
+      # spends ~2 requests on each of ~3000 repositories, which is slow, rude to
+      # raw.githubusercontent, and pointless — a plugin's pinned commit only
+      # changes when it releases.
+      #
+      # Unique key so every run saves; restore-keys pulls the most recent. The
+      # CLI also expires entries older than 7 days on its own, so a cache that
+      # survives many runs cannot freeze the index on a stale version.
+      - name: Restore the git-resolution cache
+        uses: actions/cache@v4
+        with:
+          path: data/resolve-cache.json
+          key: resolve-cache-${{ github.run_id }}
+          restore-keys: resolve-cache-
+
+      - name: Compile TypeScript
+        run: pnpm run build
+
+      - name: Build the index from the live upstream catalog
+        # Fetching upstream and resolving git-only entries needs the network.
+        # Retried so a transient third-party blip does not skip a day's publish;
+        # today's published index stays live either way.
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if node dist/cli.js build; then
+              exit 0
+            fi
+            echo "attempt $attempt failed; retrying in 20s" >&2
+            sleep 20
+          done
+          echo "index build failed after 3 attempts" >&2
+          exit 1
+
+      # --- Gate 1: the document must satisfy format 1 ------------------------
+      # The real validator, not a re-implementation: the same package DSH's
+      # Discover tab reads the index with. A failure here aborts the job, so
+      # the upload and deploy below never run.
+      - name: Validate dist/index.json with the real validator
+        run: |
+          node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const doc=JSON.parse(fs.readFileSync('dist/index.json','utf8'));const v=m.parseMarketIndex(doc,'https://hytime.github.io/dsh-discover-index/index.json');console.log('valid, plugins='+v.plugins.length)})"
+
+      # --- Gate 2: the index must not be a near-empty document ---------------
+      # Catches the failure mode where upstream is down, rate-limited, or has
+      # changed shape and the pipeline "succeeds" with a handful of entries.
+      # A near-empty but structurally valid index passes Gate 1, so this check
+      # is not redundant with it.
+      - name: Guard against a near-empty index
+        run: |
+          node -e "
+            const fs = require('fs');
+            const doc = JSON.parse(fs.readFileSync('dist/index.json', 'utf8'));
+            const count = Array.isArray(doc.plugins) ? doc.plugins.length : 0;
+            const floor = 2000;
+            if (count < floor) {
+              console.error('FAIL: dist/index.json holds ' + count + ' plugins, below the floor of ' + floor);
+              console.error('Refusing to publish. Check upstream health with: node dist/cli.js doctor');
+              process.exit(1);
+            }
+            console.log('Plugin count ok: ' + count + ' >= ' + floor);
+          "
+
+      # Additional profile outputs are declared under `profiles:` in
+      # config/config.yml, each with its own `output` filename. Validate
+      # whatever dist/*.json holds rather than hardcoding a filename that the
+      # config may rename or add to.
+      - name: Validate additional profile outputs
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for file in dist/*.json; do
+            if [ "$file" = "dist/index.json" ]; then
+              continue
+            fi
+            node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const f=process.argv[1];const doc=JSON.parse(fs.readFileSync(f,'utf8'));const v=m.parseMarketIndex(doc,'https://hytime.github.io/dsh-discover-index/'+f.split('/').pop());console.log('valid '+f+', plugins='+v.plugins.length)})" "$file"
+          done
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

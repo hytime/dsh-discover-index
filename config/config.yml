@@ -1,0 +1,46 @@
+# Project configuration.
+#
+# Two axes, deliberately separate:
+#
+#   sources  — where candidates come from (one adapter each)
+#   profiles — named bundles of sources + a star floor, one output document each
+#
+# A profile is what a user switches between in DSH's Discover market menu: each
+# one is published as its own format-1 document, so switching markets is a
+# client-side operation and needs no change to DSH itself.
+
+sources:
+  # The curated list this project was built to convert. Its live plugins.json
+  # is the source of truth — never the local clone, which is a stale fork.
+  - id: awesome-dsh-plugin
+    kind: upstream-catalog
+    enabled: true
+    url: https://awesome-dsh-plugin.com/plugins.json
+    minStars: 0
+    priority: 10
+
+# Repository identities that are never plugins. The harness itself declares
+# `dsh.bundle` (packages/bundle/base/package.json) and would otherwise pass
+# every structural check — listing the product inside a list of plugins for the
+# product is the one wrong entry every visitor would recognise.
+denyRepos:
+  - deepseek-ai/deepseek-harness
+
+# Packages excluded by editorial decision, by exact npm package name.
+denyPackages: []
+
+# No stars floor: this profile is the direct conversion of the upstream list,
+# which already carries its own curation. Sorting by stars happens in the
+# Discover UI through the declared sort keys, not by dropping entries here.
+profiles:
+  - id: index
+    title:
+      en: DSH Plugin Index
+      zh: DSH 插件索引
+    description:
+      en: The awesome-dsh-plugin list converted to the plugin market index format.
+      zh: 由 awesome-dsh-plugin 列表转换而来的插件市场索引。
+    sources:
+      - awesome-dsh-plugin
+    minStars: 0
+    output: index.json
