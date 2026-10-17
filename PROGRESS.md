@@ -1,7 +1,9 @@
 # 项目进度 / Project status
 
-> 快照时间：**2026-10-17 22:15 CST**（上一版 21:46；本次修复 deny 缺陷、修正 pnpm 配置、完成发布）
+> 快照时间：**2026-10-17 22:25 CST**（上一版 21:46；本次修复 deny 缺陷、修正 pnpm 配置、完成发布、描述附带出处）
 > 分支 `main`，已推送，CI 两个工作流均实跑成功，索引已上线。
+
+**DSH 引用源**：`https://hytime.github.io/dsh-discover-index/index.json`
 
 ---
 
@@ -18,14 +20,15 @@
 | 项 | 状态 | 证据 |
 |---|---|---|
 | TypeScript 编译 | ✅ | `tsc -p tsconfig.json --noEmit` 退出码 0 |
-| 测试 | ✅ | `vitest run` → **327 通过 / 1 跳过 / 0 失败**（9 个文件，全离线） |
+| 测试 | ✅ | `vitest run` → **328 通过 / 1 跳过 / 0 失败**（9 个文件，全离线） |
 | 真实校验器验证 | ✅ | 线上产物经 `@deepseek-ai/dsh-plugin-market-index` 校验通过 |
 | 全量构建 | ✅ | 5452 个插件（2587 npm + 2865 git） |
 | deny 名单 fail-open | ✅ 已修复 | 见下方「已修复」；`git+https` / SSH / 非 GitHub 域名均被拒绝 |
-| Git | ✅ | 4 次提交，已推送 `main` |
+| 市场描述含源码出处 | ✅ | 两语言均带 `https://github.com/hytime/dsh-discover-index`，长度 127 / 88，未触及 DSH 的 300 上限 |
+| Git | ✅ | 5 次提交，已推送 `main`，工作区干净 |
 | GitHub 仓库 | ✅ | <https://github.com/hytime/dsh-discover-index> |
 | GitHub Pages | ✅ | <https://hytime.github.io/dsh-discover-index/index.json> 返回 200 |
-| CI 工作流实跑 | ✅ | `Validate` 1m50s 通过；`Build and deploy index` build 2m29s + deploy 12s 通过 |
+| CI 工作流实跑 | ✅ | `Validate` 通过；`Build and deploy index` build + deploy 通过 |
 | 自动化 | ✅ | 每日 cron `17 6 * * *` 已生效，另支持 `workflow_dispatch` |
 
 ### 最近一次全量构建的事实
@@ -170,7 +173,8 @@ pnpm test
    `https://hytime.github.io/dsh-discover-index/index.json`
 4. 用市场菜单切换源；`stars` / `downloads` / `added` 排序项由索引自身声明，DSH 会自动显示。
 
-> ⚠️ 该 URL 目前 404，因为仓库和 Pages 都还没创建。
+> ✅ 该 URL 已上线（HTTP 200）。市场描述本身写明了源码仓库
+> `https://github.com/hytime/dsh-discover-index`，出处随数据传播。
 
 ### 添加新源
 
