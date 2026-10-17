@@ -9,7 +9,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { load as parseYaml } from 'js-yaml'
-import type { Profile, ProjectConfig, SourceConfig } from './types.js'
+import type { FieldMapping, Profile, ProjectConfig, SourceConfig } from './types.js'
 
 /** Path used when the caller does not name one, relative to the working directory. */
 export const DEFAULT_CONFIG_PATH = 'config/config.yml'
@@ -63,6 +63,53 @@ function asNumber(value: unknown, at: string, fallback: number): number {
 }
 
 /**
+ * Parse a source's member mapping.
+ *
+ * This is what makes a second catalog a configuration change rather than a code
+ * change: an adapter hands over raw entries, and the mapping says which member
+ * of each entry carries its capabilities, red lines, keywords and a numeric
+ * sort key. Every path is optional, so a source that publishes none of them is
+ * valid and simply contributes no labels beyond popularity.
+ *
+ * @param value - the `fields` member of a source.
+ * @param at - path used in messages.
+ * @returns the mapping, or `undefined` when the source declares none.
+ * @throws {ConfigError} naming the first rule the mapping breaks.
+ */
+function asFieldMapping(value: unknown, at: string): FieldMapping | undefined {
+  if (value === undefined || value === null) return undefined
+  const record = asRecord(value, at)
+  const sortKeyRecord = record.sortKey === undefined ? undefined : asRecord(record.sortKey, `${at}.sortKey`)
+  const sortKeyId = sortKeyRecord === undefined ? undefined : asString(sortKeyRecord.id, `${at}.sortKey.id`)
+  const sortKeyPath = sortKeyRecord === undefined ? undefined : asString(sortKeyRecord.path, `${at}.sortKey.path`)
+  // A path is dot-separated: each segment must be a non-empty member name, or
+  // the runtime lookup would silently read nothing and the source would appear
+  // to publish no capabilities at all.
+  const pathAt = (member: unknown, where: string): string | undefined => {
+    if (member === undefined) return undefined
+    const text = asString(member, where)
+    if (text.split('.').some((segment) => segment.trim() === '')) {
+      throw new ConfigError(`${where} must be dot-separated member names (got ${JSON.stringify(text)})`)
+    }
+    return text
+  }
+  return {
+    ...(pathAt(record.capabilities, `${at}.capabilities`) === undefined
+      ? {}
+      : { capabilities: pathAt(record.capabilities, `${at}.capabilities`) as string }),
+    ...(pathAt(record.redLines, `${at}.redLines`) === undefined
+      ? {}
+      : { redLines: pathAt(record.redLines, `${at}.redLines`) as string }),
+    ...(pathAt(record.keywords, `${at}.keywords`) === undefined
+      ? {}
+      : { keywords: pathAt(record.keywords, `${at}.keywords`) as string }),
+    ...(sortKeyRecord === undefined
+      ? {}
+      : { sortKey: { path: sortKeyPath as string, id: sortKeyId as string } }),
+  }
+}
+
+/**
  * Parse a configuration document.
  *
  * @param text - YAML source.
@@ -102,6 +149,9 @@ export function parseConfig(text: string, at = DEFAULT_CONFIG_PATH): ProjectConf
         ? {}
         : { queries: asStringArray(record.queries, `sources[${index}].queries`) }),
       priority: asNumber(record.priority, `sources[${index}].priority`, 0),
+      ...(asFieldMapping(record.fields, `sources[${index}].fields`) === undefined
+        ? {}
+        : { fields: asFieldMapping(record.fields, `sources[${index}].fields`) as FieldMapping }),
     }
   })
 

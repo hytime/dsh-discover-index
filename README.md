@@ -97,18 +97,7 @@ Git-resolved plugins still list the one version their pinned commit declares. A 
 that cannot be reached is not fatal: the plugin keeps its upstream version, because losing
 a plugin to a registry outage would be worse than showing one version of it.
 
-### Sources
-
-| What | Where |
-| --- | --- |
-| Upstream catalog (the data) | <https://awesome-dsh-plugin.com/plugins.json> · [awesome-dsh-plugin/awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) |
-| This converter (the code) | <https://github.com/hytime/dsh-discover-index> |
-| Published index (what DSH reads) | <https://hytime.github.io/dsh-discover-index/index.json> |
-
-The index is a **conversion** of the upstream list, not an independent registry. Upstream
-curates and hosts the catalog; this repository only converts it to format 1, checks it
-against the real validator, and republishes it on a daily schedule. A bad entry should be
-reported upstream; a bad *conversion* of a good entry belongs here.
+### Provenance in the document
 
 The published document carries that provenance in its own `description`, so the source
 travels with the data and is visible in Discover without consulting this README:
@@ -221,47 +210,158 @@ Note one rule this example has to obey: every plugin `category` id must appear i
 ## Using it in DSH Discover
 
 The Discover tab is **experimental**, and custom markets are gated behind a separate
-switch that ships as part of the experimental plugin-markets bundle:
+switch that ships as part of the experimental plugin-markets bundle.
 
-1. Open **Plugins**.
-2. Next to **Experimental plugins**, open **More**.
-3. Switch on **Custom plugin markets**. The Plugins page now gains two tabs:
-   **Installed** and **Discover**.
-4. Open **Discover** → **Add index source**, and paste:
+### 1. Switch on Custom plugin markets
 
-   ```
-   https://hytime.github.io/dsh-discover-index/index.json
-   ```
+Open **Plugins** and switch on **Custom plugin markets** under **Experimental plugins**.
+The Plugins page gains **Installed** and **Discover** tabs.
 
-   That is the only URL needed. It serves a complete format-1 document; there is no
-   companion manifest or API to configure.
-5. Once more than one source is added, use the **market menu** to switch between them.
-   Each configured profile is a separate index and therefore a separate market.
-6. Search, filter, and sort the market, then install the plugin you want.
+![Custom plugin markets switched on under Experimental plugins](docs/images/01-enable-custom-market.jpg)
+
+### 2. Add the index source
+
+Open **Discover** → **Add index source** and paste:
+
+```
+https://hytime.github.io/dsh-discover-index/index.json
+```
+
+That is the only URL needed. It serves a complete format-1 document; there is no
+companion manifest or API to configure.
+
+![The index source dialog with the published index URL](docs/images/02-add-index-source.jpg)
+
+### 3. Browse the market
+
+The market is **DSH 插件索引**. The category pills, the **Labels** filter, and the
+**Sort** menu are all declared by the index itself, so they appear the moment the source
+is added — nothing in DSH has to know what this market contains.
+
+![The Discover list: category pills, labels on every card, and the sort menu](docs/images/03-plugin-list.jpg)
+
+### 4. Open a plugin
+
+A plugin's page lists every version the index carries, with the recommended one marked,
+and shows the declared labels under **Labels**.
+
+![A plugin detail page showing labels and the version list](docs/images/04-plugin-detail.jpg)
+
+Once more than one source is added, use the **market menu** to switch between them. Each
+configured profile is a separate index and therefore a separate market.
 
 Switching markets is a client-side operation because each profile is published as its
 own complete index — no DSH change is needed to add a market. Marketplace titles,
 descriptions and plugin metadata are third-party text and carry no endorsement; the
 `description` above names this repository so the provenance is visible in that list.
 
-## Adding another source later
+> These screenshots come from a DSH 0.2.1-rc.2 instance whose only market is this index,
+> so what they show is this index and nothing else. The categories, labels, sort keys,
+> and version list are all rendered from the published document.
 
-Configuration is data. A source is one adapter plus one entry:
+## Configuring a source
 
-1. Add an adapter module under `src/sources/` that turns fetched data into `Candidate[]`
-   (see `src/sources/upstream-catalog.ts`).
+A source is one entry in `config/config.yml`. Its `kind` picks the adapter that knows how
+to read the document; its `fields` mapping says where that document keeps the things the
+pipeline turns into labels, keywords, and sort keys.
+
+The shipped configuration reads the upstream catalog with no mapping at all, because that
+adapter already knows the upstream shape:
+
+```yaml
+sources:
+  - id: awesome-dsh-plugin
+    kind: upstream-catalog
+    enabled: true
+    url: https://awesome-dsh-plugin.com/plugins.json
+    minStars: 0
+    priority: 10
+```
+
+### Pointing at a document that names things differently
+
+`fields` is what makes a second catalog a configuration change rather than a code change.
+Every path is dot-separated and may be omitted; anything omitted contributes nothing.
+This example reads a catalog that nests its trust facts under `security` and publishes its
+own `score`:
+
+```yaml
+sources:
+  - id: other-catalog
+    kind: upstream-catalog
+    enabled: true
+    url: https://example.test/catalog.json
+    minStars: 0
+    priority: 5
+    fields:
+      capabilities: security.permissions   # -> labels such as `shell`
+      redLines: security.warnings          # -> normalised `risk:` labels
+      keywords: topics                     # -> extra search terms
+      sortKey:
+        path: score                        # -> a numeric sort key…
+        id: score                          #    …published under this id
+```
+
+| Key | What it points at | What it becomes |
+| --- | --- | --- |
+| `capabilities` | An array of permission ids, such as `["shell", "network"]` | One label per id, plus each id and its words as keywords |
+| `redLines` | An array of prose findings | One `risk:` label per recognised class; unrecognised sentences are ignored |
+| `keywords` | An array of discovery words | Extra search terms, on top of the identity keywords and the category |
+| `sortKey.path` | A number | A sort key, so Discover gains a menu entry that orders by it |
+| `sortKey.id` | — | The id the key is published and referenced under |
+
+Two rules are enforced at load time, because both failure modes are silent otherwise:
+
+- **An empty path segment is rejected.** `security..permissions` would resolve to nothing
+  and the source would appear to publish no capabilities at all.
+- **A `sortKey` needs both `path` and `id`.** A value with no id cannot be referenced; an
+  id with no value would advertise a sort option that orders nothing.
+
+A path that simply does not exist in the document is not an error — the entry keeps its
+other facts and contributes no labels from that member. That is deliberate: one wrong
+path should cost you the labels it pointed at, not the whole run.
+
+### Declaring what the index publishes
+
+A custom sort key is declared automatically from the candidates that carry it, so a
+configured `sortKey` appears in Discover's **Sort** menu without further work. The same
+applies to labels: every label a plugin references is declared, and every declaration has
+a localized title, falling back to the id for a vocabulary this project has not seen.
+
+### Adding a source that needs a new adapter
+
+Configuration cannot invent a document format. When the catalog is not one the existing
+adapters can read:
+
+1. Add an adapter module under `src/sources/` that turns the fetched document into
+   `Candidate[]` (see `src/sources/upstream-catalog.ts`).
 2. Register its `kind` in `KNOWN_SOURCE_KINDS` in `src/config.ts` — configuration naming
    an unregistered kind is rejected on purpose, so a typo cannot silently disable a source.
-3. Add the source to `config/config.yml` under `sources:` with its `id`, `kind`, `url`
-   (if it has one), `minStars`, and `priority`. Lower `priority` wins when two sources
-   yield the same package name.
-4. Reference the source's `id` from a `profiles:` entry to publish it, or from an
-   existing profile to merge it into one market.
+3. Add the entry under `sources:` and reference its `id` from a `profiles:` entry to
+   publish it, or from an existing profile to merge it into one market. Lower `priority`
+   wins when two sources yield the same package name.
 
 A new source must yield real npm package names and exact versions for npm entries.
 For git-only entries, pin a commit SHA. Guessing a name from a repository name is wrong
 twice over: repository names are not unique across owners, and many carry uppercase
 letters that an npm package name may not contain.
+
+### Publishing a second market
+
+Each `profiles:` entry produces its own document and therefore its own market in Discover:
+
+```yaml
+profiles:
+  - id: curated
+    title: { en: Curated Plugins, zh: 精选插件 }
+    sources: [awesome-dsh-plugin, other-catalog]
+    minStars: 100
+    output: curated.json
+```
+
+Profiles may share sources; the same plugin appearing in two markets is fine, because the
+documents are independent. `minStars` and each source's own `minStars` both apply — the
+profile uses the higher of the two.
 
 ## Running locally
 

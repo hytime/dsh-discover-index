@@ -162,33 +162,124 @@ Git 解析的插件仍然只列它们固定提交里的那一个版本。registr
 
 ## 在 DSH Discover 中使用
 
-Discover 标签页是**实验性**的，自定义市场还藏在另一个开关后面，该开关随实验性插件市场 bundle 一起提供：
+Discover 标签页是**实验性**的，自定义市场还藏在另一个开关后面，该开关随实验性插件市场 bundle 一起提供。
 
-1. 打开 **Plugins**。
-2. 在 **Experimental plugins** 旁打开 **More**。
-3. 打开 **Custom plugin markets**。Plugins 页面此时会多出两个标签页：**Installed** 和 **Discover**。
-4. 打开 **Discover** → **Add index source**，粘贴：
+### 1. 打开「自定义插件市场」
 
-   ```
-   https://hytime.github.io/dsh-discover-index/index.json
-   ```
+打开 **Plugins**，在 **实验性插件** 下打开 **自定义插件市场**。Plugins 页面此时会多出 **已安装** 和 **发现** 两个标签页。
 
-   只需要这一个 URL。它本身就是一份完整的格式 1 文档，不配套任何 manifest 或 API。
-5. 添加多个来源后，用**市场菜单**在它们之间切换。每个配置的 profile 都是一份独立索引，因而也是一个独立市场。
-6. 在市场内搜索、筛选、排序，然后安装需要的插件。
+![在「实验性插件」下打开「自定义插件市场」](docs/images/01-enable-custom-market.jpg)
+
+### 2. 添加索引源
+
+打开 **发现** → **添加索引源**，粘贴：
+
+```
+https://hytime.github.io/dsh-discover-index/index.json
+```
+
+只需要这一个 URL。它本身就是一份完整的格式 1 文档，不配套任何 manifest 或 API。
+
+![索引源弹窗，已填入已发布的索引 URL](docs/images/02-add-index-source.jpg)
+
+### 3. 浏览市场
+
+市场名为 **DSH 插件索引**。分类胶囊、**标签**筛选器与**排序**菜单全部由索引自身声明，因此添加来源后立刻出现——DSH 不需要知道这个市场里有什么。
+
+![发现列表：分类胶囊、每张卡片上的标签、排序菜单](docs/images/03-plugin-list.jpg)
+
+### 4. 打开某个插件
+
+插件页会列出索引中该插件的每一个版本（标出推荐版本），并在**标签**一行展示声明的标签。
+
+![插件详情页：标签与版本列表](docs/images/04-plugin-detail.jpg)
+
+添加多个来源后，用**市场菜单**在它们之间切换。每个配置的 profile 都是一份独立索引，因而也是一个独立市场。
 
 切换市场是纯客户端操作，因为每个 profile 都发布为一份完整索引——新增市场无需改动 DSH。市场标题、描述与插件元数据都是第三方文本，不构成任何背书；上面的 `description` 写明了本仓库地址，因此出处在这份列表里就能看到。
 
-## 以后如何新增来源
+> 这些截图来自一个只配置了本索引的 DSH 0.2.1-rc.2 实例，因此画面里只有本索引、没有别的东西。其中的分类、标签、排序键与版本列表，全部渲染自已发布的那份文档。
 
-配置即数据。新增一个来源只需要一个适配器加一条配置：
+## 配置来源
 
-1. 在 `src/sources/` 下新增适配器模块，把抓取到的数据转换为 `Candidate[]`（参考 `src/sources/upstream-catalog.ts`）。
+一个来源就是 `config/config.yml` 里的一条配置。`kind` 决定用哪个适配器读文档；`fields` 映射说明该文档把「要变成标签、关键词、排序键的东西」放在哪里。
+
+仓库自带的配置读取上游目录、不需要任何映射，因为该适配器本身就知道上游的结构：
+
+```yaml
+sources:
+  - id: awesome-dsh-plugin
+    kind: upstream-catalog
+    enabled: true
+    url: https://awesome-dsh-plugin.com/plugins.json
+    minStars: 0
+    priority: 10
+```
+
+### 指向一个字段命名不同的文档
+
+`fields` 就是「换一份目录 = 改配置而不是改代码」的载体。每个路径都以点号分隔，且全部可选；没写的部分就不贡献任何内容。下面这个例子读的是把信任信息嵌在 `security` 下、并自带 `score` 的目录：
+
+```yaml
+sources:
+  - id: other-catalog
+    kind: upstream-catalog
+    enabled: true
+    url: https://example.test/catalog.json
+    minStars: 0
+    priority: 5
+    fields:
+      capabilities: security.permissions   # -> 形如 `shell` 的标签
+      redLines: security.warnings          # -> 归一化后的 `risk:` 标签
+      keywords: topics                     # -> 额外的搜索词
+      sortKey:
+        path: score                        # -> 一个数值排序键……
+        id: score                          #    ……以这个 id 发布
+```
+
+| 键 | 指向 | 变成什么 |
+| --- | --- | --- |
+| `capabilities` | 权限 id 数组，如 `["shell", "network"]` | 每个 id 一个标签，同时该 id 及其词元作为关键词 |
+| `redLines` | 描述性发现的数组 | 每个可识别类别一个 `risk:` 标签；无法识别的句子被忽略 |
+| `keywords` | 发现词数组 | 在身份关键词与分类之外的额外搜索词 |
+| `sortKey.path` | 一个数字 | 一个排序键，于是 Discover 多出一个按它排序的菜单项 |
+| `sortKey.id` | — | 该键发布与被引用时使用的 id |
+
+有两条规则在加载时就强制检查，因为这两种错误否则都是静默的：
+
+- **拒绝空的路径片段。** `security..permissions` 会解析到空，来源看上去「没有发布任何能力」。
+- **`sortKey` 必须同时给 `path` 和 `id`。** 有值无 id 无法被引用；有 id 无值会对外宣称一个排不出顺序的排序项。
+
+路径在文档里根本不存在**不算错误**——该条目保留其他信息，只是不再从该成员贡献标签。这是刻意的：写错一个路径，代价应该是丢掉它指向的标签，而不是整轮构建失败。
+
+### 索引会声明什么
+
+自定义排序键会根据实际携带它的候选项自动声明，因此配置好的 `sortKey` 无需额外工作就会出现在 Discover 的**排序**菜单里。标签同理：插件引用的每个标签都会被声明，而每个声明都有本地化标题；对于本项目没见过的词表，标题回退为 id 本身。
+
+### 需要新适配器时
+
+配置无法凭空创造一种文档格式。当目录不是现有适配器能读的形状时：
+
+1. 在 `src/sources/` 下新增适配器模块，把抓取到的文档转换为 `Candidate[]`（参考 `src/sources/upstream-catalog.ts`）。
 2. 在 `src/config.ts` 的 `KNOWN_SOURCE_KINDS` 中注册它的 `kind`——配置里写了未注册的 kind 会被直接拒绝，这样拼写错误不会悄悄让一个来源失效。
-3. 在 `config/config.yml` 的 `sources:` 下添加该来源，填好 `id`、`kind`、`url`（如果有）、`minStars` 和 `priority`。当两个来源产出同一个包名时，`priority` 数值更小者优先。
-4. 在 `profiles:` 条目中引用该来源的 `id` 以单独发布，或引用到已有 profile 中以合并进同一个市场。
+3. 在 `sources:` 下添加该条目，并在 `profiles:` 条目中引用它的 `id` 以单独发布，或引用到已有 profile 中以合并进同一个市场。当两个来源产出同一个包名时，`priority` 数值更小者优先。
 
 新来源对 npm 条目必须给出真实的 npm 包名与精确版本。仅有 Git 的条目要固定提交 SHA。从仓库名猜测包名会错两次：仓库名在不同 owner 之间并不唯一，而且很多还含 npm 包名不允许的大写字母。
+
+### 发布第二个市场
+
+每个 `profiles:` 条目各自产出一份文档，因而在 Discover 里也是一个独立市场：
+
+```yaml
+profiles:
+  - id: curated
+    title: { en: Curated Plugins, zh: 精选插件 }
+    sources: [awesome-dsh-plugin, other-catalog]
+    minStars: 100
+    output: curated.json
+```
+
+多个 profile 可以共用来源；同一个插件出现在两个市场里没有问题，因为两份文档相互独立。`minStars` 与各来源自己的 `minStars` 都会生效——profile 取两者中更高的那个。
 
 ## 本地运行
 

@@ -43,6 +43,15 @@ export interface UpstreamEntry {
   readonly redLines?: readonly string[]
   /** Discovery keywords the source itself published, when it has any. */
   readonly keywords?: readonly string[]
+  /**
+   * A numeric popularity value the source publishes under its own sort-key id,
+   * mapped by `fields.sortKey` in configuration. Emitted as a sort key so the
+   * value can order Discover's list, which is the only thing format 1 does with
+   * a number.
+   */
+  readonly customSortKey?: number
+  /** The id `customSortKey` should be published under. */
+  readonly customSortKeyId?: string
 }
 
 /**
@@ -87,6 +96,12 @@ function sortKeys(entry: UpstreamEntry): Record<string, number> {
   if (entry.downloads !== undefined) keys.downloads = entry.downloads
   const added = fallbackTimestamp(entry.added)
   if (added !== undefined) keys.added = added
+  // A configured custom key is emitted only when both the value and its id are
+  // known: an id without a value would declare a sort option that orders
+  // nothing, and a value without an id cannot be referenced at all.
+  if (entry.customSortKey !== undefined && entry.customSortKeyId !== undefined) {
+    keys[entry.customSortKeyId] = entry.customSortKey
+  }
   return keys
 }
 

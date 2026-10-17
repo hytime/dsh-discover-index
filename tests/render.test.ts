@@ -182,9 +182,25 @@ describe.skipIf(skipIfMissing(render))('renderIndex: a document the validator ac
     expect(parsed.metadata.categories['some-new-category']).toBeDefined()
   })
 
-  it('drops an undeclared sort key instead of breaking the document', () => {
+  it('declares a sort key a source contributed, rather than dropping its value', () => {
+    // A source may publish its own numeric key (a score, a rating) under an id
+    // this project has never heard of. Declaring it and keeping the value is the
+    // only consistent pair of choices: declaring without keeping would render a
+    // sort option that orders nothing, and keeping without declaring would fail
+    // validation. What must NOT happen is the value disappearing while the key
+    // is advertised.
     const doc = render_.renderIndex(
-      [candidate('dsh-keys', { sortKeys: { stars: 3, somethingNotDeclared: 1 } })],
+      [candidate('dsh-keys', { sortKeys: { stars: 3, sourceScore: 1 } })],
+      profile,
+    )
+    expect(Object.hasOwn((doc as any).metadata.sortKeys, 'sourceScore')).toBe(true)
+    const parsed = parseMarketIndex(doc, TEST_INDEX_URL)
+    expect(parsed.plugins[0]?.metadata.sortKeys).toEqual({ stars: 3, sourceScore: 1 })
+  })
+
+  it('drops a non-finite sort key value instead of breaking the document', () => {
+    const doc = render_.renderIndex(
+      [candidate('dsh-keys', { sortKeys: { stars: 3, broken: Number.POSITIVE_INFINITY } })],
       profile,
     )
     const parsed = parseMarketIndex(doc, TEST_INDEX_URL)

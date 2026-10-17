@@ -122,7 +122,9 @@ export function toUpstreamEntry(
     ...(asString(raw.version) === undefined ? {} : { version: asString(raw.version) as string }),
     ...(asNumber(raw.stars) === undefined ? {} : { stars: asNumber(raw.stars) as number }),
     ...(asNumber(raw.downloads) === undefined ? {} : { downloads: asNumber(raw.downloads) as number }),
-    ...(sortKey === undefined ? {} : { customSortKey: sortKey }),
+    ...(sortKey === undefined
+      ? {}
+      : { customSortKey: sortKey, customSortKeyId: fields.sortKey?.id ?? '' }),
     ...(asString(raw.added) === undefined ? {} : { added: asString(raw.added) as string }),
     ...(asString(raw.tarball) === undefined ? {} : { tarball: asString(raw.tarball) as string }),
     ...(asStringList(capabilities) === undefined
@@ -133,14 +135,19 @@ export function toUpstreamEntry(
   }
 }
 
-/** Every entry upstream publishes, normalized and in published order. */
-export function upstreamEntries(raw: unknown): UpstreamEntry[] {
+/**
+ * Every entry upstream publishes, normalized and in published order.
+ * @param raw - the parsed upstream document.
+ * @param fields - where this source keeps the members the pipeline reads.
+ * @returns the entries that carry the minimum identity.
+ */
+export function upstreamEntries(raw: unknown, fields: FieldMapping = DEFAULT_FIELD_MAPPING): UpstreamEntry[] {
   if (!isRecord(raw)) return []
   const plugins = raw.plugins
   if (!Array.isArray(plugins)) return []
   const out: UpstreamEntry[] = []
   for (const member of plugins) {
-    const entry = toUpstreamEntry(member)
+    const entry = toUpstreamEntry(member, fields)
     if (entry) out.push(entry)
   }
   return out
@@ -150,7 +157,12 @@ export interface ParseUpstreamOptions {
   readonly sourceId: string
   /** Applied to the entry's star count; 0 keeps everything. */
   readonly minStars: number
-  /** Upstream's declared category titles, reused so descriptions stay localized. */
+  /**
+   * Where this source keeps the members the pipeline reads. Absent means the
+   * upstream catalog's own names, which is why a second catalog that publishes
+   * its trust facts under different keys needs configuration, not a new adapter.
+   */
+  readonly fields?: FieldMapping
 }
 
 /**
@@ -170,7 +182,7 @@ export interface ParseUpstreamOptions {
 export function parseUpstreamCatalog(raw: unknown, options: ParseUpstreamOptions): SourceResult {
   const candidates: Candidate[] = []
   const rejections: Rejection[] = []
-  const entries = upstreamEntries(raw)
+  const entries = upstreamEntries(raw, options.fields)
 
   if (entries.length === 0) {
     rejections.push({ id: '(whole document)', stage: 'source', reason: 'upstream document carried no readable plugins array' })
@@ -197,7 +209,7 @@ export function parseUpstreamCatalog(raw: unknown, options: ParseUpstreamOptions
  */
 export function extractGitEntries(raw: unknown, options: ParseUpstreamOptions): UpstreamEntry[] {
   const out: UpstreamEntry[] = []
-  for (const entry of upstreamEntries(raw)) {
+  for (const entry of upstreamEntries(raw, options.fields)) {
     if (options.minStars > 0 && (entry.stars ?? 0) < options.minStars) continue
     if (entry.npm && entry.version) continue
     out.push(entry)

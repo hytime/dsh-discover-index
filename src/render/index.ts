@@ -190,7 +190,10 @@ function safeHttpUrl(url: string | undefined): string | undefined {
 }
 
 /** Render one candidate into the shape the format defines. */
-function renderPlugin(candidate: Candidate): Record<string, unknown> {
+function renderPlugin(
+  candidate: Candidate,
+  declaredSortKeys: ReadonlySet<string>,
+): Record<string, unknown> {
   const versions = candidate.versions.map((version) => ({
     version: version.version,
     publishTimestamp: version.publishTimestamp,
@@ -207,10 +210,14 @@ function renderPlugin(candidate: Candidate): Record<string, unknown> {
 
   // Sort keys are intersected with what the index declares: an undeclared key
   // fails validation outright, so an unknown one is dropped here rather than
-  // allowed to break the whole document.
+  // allowed to break the whole document. The set is passed in rather than read
+  // from the constant table, because a source may contribute its own key (a
+  // score, a rating) and that key is declared by the same derivation that this
+  // check consults — reading the constant here would declare a key and then
+  // silently drop every value for it.
   const sortKeys: Record<string, number> = {}
   for (const [id, value] of Object.entries(candidate.sortKeys)) {
-    if (!Object.hasOwn(SORT_KEY_TITLES, id)) continue
+    if (!declaredSortKeys.has(id)) continue
     if (!Number.isFinite(value)) continue
     sortKeys[id] = value
   }
@@ -290,6 +297,16 @@ export function renderIndex(candidates: readonly Candidate[], profile: Profile):
   for (const [id, declaration] of Object.entries(SORT_KEY_TITLES)) {
     sortKeys[id] = { title: { ...declaration.title }, order: declaration.order }
   }
+  // A source may publish its own numeric key (stars on another host, a rating,
+  // a score). Declare every one a candidate actually carries: an id a plugin
+  // references but the index does not declare fails the whole document, and a
+  // declared id with no values is only inert, so deriving is the safe direction.
+  for (const candidate of candidates) {
+    for (const id of Object.keys(candidate.sortKeys)) {
+      if (Object.hasOwn(sortKeys, id)) continue
+      sortKeys[id] = { title: fallbackTitle(id), order: 'desc' }
+    }
+  }
   const labelDeclarations: Record<string, { title: Record<string, string> }> = {}
   for (const label of [...labels].sort()) {
     // `labelTitle` is total and owns the vocabulary: capabilities, risk
@@ -306,7 +323,7 @@ export function renderIndex(candidates: readonly Candidate[], profile: Profile):
     title: { ...cleanLocalized(profile.title) },
     ...(description === undefined ? {} : { description }),
     metadata: { categories, labels: labelDeclarations, sortKeys },
-    plugins: candidates.map(renderPlugin),
+    plugins: candidates.map((candidate) => renderPlugin(candidate, new Set(Object.keys(sortKeys)))),
   }
 }
 

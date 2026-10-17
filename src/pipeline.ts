@@ -221,11 +221,19 @@ export async function runPipeline(options: RunOptions = {}): Promise<RunResult> 
     // default deadline on a cold connection, so this one call gets its own.
     const raw = await http.json<unknown>(url, {}, { timeoutMs: 120_000 })
 
-    const extracted = parseUpstreamCatalog(raw, { sourceId: source.id, minStars: source.minStars })
+    const extracted = parseUpstreamCatalog(raw, {
+      sourceId: source.id,
+      minStars: source.minStars,
+      ...(source.fields === undefined ? {} : { fields: source.fields }),
+    })
     rejections.push(...extracted.rejections)
     const candidates = [...extracted.candidates]
 
-    const untitled = extractGitEntries(raw, { sourceId: source.id, minStars: source.minStars })
+    const untitled = extractGitEntries(raw, {
+      sourceId: source.id,
+      minStars: source.minStars,
+      ...(source.fields === undefined ? {} : { fields: source.fields }),
+    })
     const keyOf = (entry: UpstreamEntry): string => `${entry.owner}/${entry.name}`
     // Split before fetching: entries already remembered are rebuilt from the
     // cache, never re-fetched; the rest are budgeted and the remainder deferred.

@@ -1,0 +1,46 @@
+sources:
+  - id: awesome-dsh-plugin
+    kind: upstream-catalog
+    enabled: true
+    url: https://awesome-dsh-plugin.com/plugins.json
+    minStars: 0
+    priority: 10
+
+  - id: example-catalog
+    kind: upstream-catalog
+    enabled: true
+    url: https://example.test/catalog.json
+    minStars: 0
+    priority: 5
+    fields:
+      capabilities: security.permissions
+      redLines: security.warnings
+      keywords: topics
+      sortKey:
+        path: score
+        id: score
+
+denyRepos:
+  - deepseek-ai/deepseek-harness
+denyPackages: []
+
+profiles:
+  - id: index
+    title:
+      en: Example Market
+      zh: 示例市场
+    sources:
+      - awesome-dsh-plugin
+      - example-catalog
+    minStars: 0
+    output: index.json
+
+  - id: curated
+    title:
+      en: Curated Plugins
+      zh: 精选插件
+    sources:
+      - awesome-dsh-plugin
+      - example-catalog
+    minStars: 100
+    output: curated.json
