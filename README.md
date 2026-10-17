@@ -34,13 +34,14 @@ Published and automated. The index URL above serves a live document, rebuilt dai
 | Check | Result |
 | --- | --- |
 | TypeScript | compiles clean |
-| Tests | 354 passing, offline, against fixtures recorded from the live catalog |
-| Published index | 5,452 plugins, format 1, accepted by the real validator |
+| Tests | Pass offline against fixtures recorded from the live catalog — `pnpm test` |
+| Published index | Format 1, accepted by the real validator, rebuilt daily |
 | Automation | daily cron, plus `workflow_dispatch` for a manual rebuild |
 
-The pipeline reads the live catalog, so the plugin count moves by a few entries between
-runs as upstream gains, loses, and re-pins repositories. That is expected. See
-[Running locally](#running-locally).
+The exact plugin count is deliberately not quoted here: the pipeline reads the live
+catalog, so it moves by a few entries between runs as upstream gains, loses, and re-pins
+repositories. Query the index, or read the run summary in Actions, for today's number.
+See [Running locally](#running-locally) to build it yourself.
 
 ## Run your own market
 
