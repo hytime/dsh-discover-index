@@ -95,8 +95,13 @@ jobs:
       # Discover tab reads the index with. A failure here aborts the job, so
       # the upload and deploy below never run.
       - name: Validate dist/index.json with the real validator
+        # The index URL is derived from the repository that runs the job, not
+        # hardcoded, so a fork validates against its own Pages origin. Format 1
+        # resolves relative icon references against this URL, so passing the
+        # wrong origin here would silently validate a different document than
+        # the one the fork publishes.
         run: |
-          node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const doc=JSON.parse(fs.readFileSync('dist/index.json','utf8'));const v=m.parseMarketIndex(doc,'https://hytime.github.io/dsh-discover-index/index.json');console.log('valid, plugins='+v.plugins.length)})"
+          node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');const origin = 'https://' + owner + '.github.io/' + repo;const doc=JSON.parse(fs.readFileSync('dist/index.json','utf8'));const v=m.parseMarketIndex(doc, origin + '/index.json');console.log('valid, plugins='+v.plugins.length)})"
 
       # --- Gate 2: the index must not be a near-empty document ---------------
       # Catches the failure mode where upstream is down, rate-limited, or has
@@ -130,7 +135,7 @@ jobs:
             if [ "$file" = "dist/index.json" ]; then
               continue
             fi
-            node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const f=process.argv[1];const doc=JSON.parse(fs.readFileSync(f,'utf8'));const v=m.parseMarketIndex(doc,'https://hytime.github.io/dsh-discover-index/'+f.split('/').pop());console.log('valid '+f+', plugins='+v.plugins.length)})" "$file"
+            node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');const origin = 'https://' + owner + '.github.io/' + repo;const f=process.argv[1];const doc=JSON.parse(fs.readFileSync(f,'utf8'));const v=m.parseMarketIndex(doc, origin+'/'+f.split('/').pop());console.log('valid '+f+', plugins='+v.plugins.length)})" "$file"
           done
 
       - name: Upload Pages artifact

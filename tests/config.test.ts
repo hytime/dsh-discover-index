@@ -61,13 +61,18 @@ describe('shipped config/config.yml', () => {
     // description and nothing else. DSH truncates that text at 300 UTF-16 code
     // units when it hands it to the model, so the URL must be present and the
     // whole string short enough not to be clipped.
+    //
+    // Deliberately not asserted against this repository's own URL: a fork
+    // republishes the same converter under its own name, and a hardcoded
+    // assertion here would fail every fork on the first push. What must hold is
+    // that the description names *a* repository, so the check is for the shape.
     const config = lazySrc(configModule, 'config.ts').loadConfig('config/config.yml')
     for (const profile of config.profiles) {
       for (const language of ['en', 'zh']) {
         const text = profile.description?.[language]
         expect(text, `${profile.id} has no ${language} description`).toBeTruthy()
         expect(text, `${profile.id}.${language} must name the source repository`)
-          .toContain('https://github.com/hytime/dsh-discover-index')
+          .toMatch(/https:\/\/github\.com\/[^\s/]+\/[^\s/]+/u)
         expect(text!.length, `${profile.id}.${language} exceeds DSH's 300-unit clip`)
           .toBeLessThanOrEqual(300)
       }

@@ -74,7 +74,7 @@ jobs:
 
       - name: Validate dist/index.json with the real validator
         run: |
-          node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const doc=JSON.parse(fs.readFileSync('dist/index.json','utf8'));const v=m.parseMarketIndex(doc,'https://hytime.github.io/dsh-discover-index/index.json');console.log('valid, plugins='+v.plugins.length)})"
+          node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');const origin = 'https://' + owner + '.github.io/' + repo;const doc=JSON.parse(fs.readFileSync('dist/index.json','utf8'));const v=m.parseMarketIndex(doc, origin + '/index.json');console.log('valid, plugins='+v.plugins.length)})"
 
       # Additional profile outputs (configured in config/config.yml) are
       # validated generically, so renaming or adding a profile needs no change
@@ -87,7 +87,7 @@ jobs:
             if [ "$file" = "dist/index.json" ]; then
               continue
             fi
-            node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const f=process.argv[1];const doc=JSON.parse(fs.readFileSync(f,'utf8'));const v=m.parseMarketIndex(doc,'https://hytime.github.io/dsh-discover-index/'+f.split('/').pop());console.log('valid '+f+', plugins='+v.plugins.length)})" "$file"
+            node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');const origin = 'https://' + owner + '.github.io/' + repo;const f=process.argv[1];const doc=JSON.parse(fs.readFileSync(f,'utf8'));const v=m.parseMarketIndex(doc, origin+'/'+f.split('/').pop());console.log('valid '+f+', plugins='+v.plugins.length)})" "$file"
           done
 
       # Mirrors build.yml's floor check, so a pull request that would trip the

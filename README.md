@@ -8,6 +8,17 @@ Aggregates the live [awesome-dsh-plugin](https://awesome-dsh-plugin.com/) catalo
 
 Published index: <https://hytime.github.io/dsh-discover-index/index.json>
 
+> [!NOTE]
+> **Requires a recent DSH, and it is used as a custom market.**
+> This index is consumed by the experimental **Custom plugin markets** feature, not by
+> DSH core. That feature first shipped in **DSH 0.2.1-alpha.4** (2026-10-15) and is
+> carried by every 0.2.1 build since; an older DSH has no Discover tab and no way to add
+> an index source. It is still marked experimental upstream, so it is off by default and
+> you switch it on yourself — see [Using it in DSH Discover](#using-it-in-dsh-discover).
+>
+> Nothing here patches or extends DSH: this repository only publishes a JSON file, and
+> DSH reads it once you point the feature at that URL.
+
 > [!IMPORTANT]
 > **This project is a conversion and aggregation source, not a security review.**
 > Every entry in the index is third-party data republished from upstream. Nothing here
@@ -30,6 +41,12 @@ Published and automated. The index URL above serves a live document, rebuilt dai
 The pipeline reads the live catalog, so the plugin count moves by a few entries between
 runs as upstream gains, loses, and re-pins repositories. That is expected. See
 [Running locally](#running-locally).
+
+## Run your own market
+
+This repository is a template. Fork it, point it at a catalog, and it publishes your own
+market at your own GitHub Pages URL, rebuilt daily — no server, and nothing hardcoded to
+this account. **[Publishing your own plugin market →](FORKING.md)**
 
 ## What it produces
 
@@ -209,13 +226,42 @@ Note one rule this example has to obey: every plugin `category` id must appear i
 
 ## Using it in DSH Discover
 
-The Discover tab is **experimental**, and custom markets are gated behind a separate
-switch that ships as part of the experimental plugin-markets bundle.
+The Discover tab is **experimental**: it is not part of a stock DSH install. It lives in
+an optional bundle, which has to be present in your profile before the switch in step 1
+exists at all.
+
+**Prerequisites.**
+
+1. A DSH build from **0.2.1-alpha.4** or later — the release that first shipped this
+   feature.
+2. The experimental plugin-markets bundle installed into your profile:
+
+   ```bash
+   dsh plugin --profile web add @deepseek-ai/dsh-experimental-plugin-market-bundle
+   ```
+
+   `dsh plugin` forwards to pnpm inside the profile directory, so `--profile` is required
+   and the rest is pnpm's own syntax. A stock `web` profile ships only the base and
+   web-app bundles, so without this step there is no **Custom plugin markets** row to
+   switch on.
+
+   > The Desktop app owns its `desktop` profile exclusively and the CLI refuses
+   > `--profile desktop` outright, so Desktop users install the bundle from the app's own
+   > Plugins page instead of the command above.
+
+This index itself is **not** a DSH plugin and needs no installation — it is one JSON file
+that DSH reads over https, so the only thing to install is the feature that can read it.
 
 ### 1. Switch on Custom plugin markets
 
 Open **Plugins** and switch on **Custom plugin markets** under **Experimental plugins**.
-The Plugins page gains **Installed** and **Discover** tabs.
+The Plugins page gains **Installed** and **Discover** tabs. The switch stays off by
+default because upstream still marks the feature experimental; switching it on mounts the
+Discover tab and the market service behind it.
+
+Any bundle whose name starts with `@deepseek-ai/dsh-experimental-` is listed under
+**Experimental plugins** — that grouping is by name, not a separate registry, which is why
+the bundle has to be installed before the row appears.
 
 ![Custom plugin markets switched on under Experimental plugins](docs/images/01-enable-custom-market.jpg)
 
@@ -387,10 +433,11 @@ a local copy trails the live catalog badly.
 `DSH_DISCOVER_UPSTREAM_URL` overrides the catalog URL, which is useful for testing
 against a recorded response without touching `config/config.yml`.
 
-To reproduce exactly what the workflow gates on, run the validator the way CI does:
+To reproduce exactly what the workflow gates on, run the validator the way CI does. CI
+derives the origin from the repository running the job, so this form works for any fork:
 
 ```bash
-node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const doc=JSON.parse(fs.readFileSync('dist/index.json','utf8'));const v=m.parseMarketIndex(doc,'https://hytime.github.io/dsh-discover-index/index.json');console.log('valid, plugins='+v.plugins.length)})"
+GITHUB_REPOSITORY=hytime/dsh-discover-index node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [o,r]=process.env.GITHUB_REPOSITORY.split('/');const doc=JSON.parse(fs.readFileSync('dist/index.json','utf8'));const v=m.parseMarketIndex(doc,'https://'+o+'.github.io/'+r+'/index.json');console.log('valid, plugins='+v.plugins.length)})"
 ```
 
 ## Automation
