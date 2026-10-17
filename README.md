@@ -16,19 +16,50 @@ Published index: <https://hytime.github.io/dsh-discover-index/index.json>
 
 ## Status
 
-The pipeline is complete and verified locally: TypeScript compiles, the test suite passes
-offline, and a full `node dist/cli.js build` produces an index that the real
-`@deepseek-ai/dsh-plugin-market-index` validator accepts.
+Published and automated. The index URL above serves a live document, rebuilt daily by
+[`build.yml`](.github/workflows/build.yml) and deployed only after the real
+`@deepseek-ai/dsh-plugin-market-index` validator accepts it.
 
-The workflows have not yet run in Actions, and the repository is not published, so the
-index URL above is not live. Treat it as unverified until a scheduled run has deployed it.
-See [Running locally](#running-locally).
+| Check | Result |
+| --- | --- |
+| TypeScript | compiles clean |
+| Tests | 327 passing, offline, against fixtures recorded from the live catalog |
+| Published index | 5,452 plugins, format 1, accepted by the real validator |
+| Automation | daily cron, plus `workflow_dispatch` for a manual rebuild |
+
+The pipeline reads the live catalog, so the plugin count moves by a few entries between
+runs as upstream gains, loses, and re-pins repositories. That is expected. See
+[Running locally](#running-locally).
 
 ## What it produces
 
-`dist/index.json` — a single format-1 document. Additional **profiles** declared in
-`config/config.yml` each produce their own document (for example a star-floor subset
+`dist/index.json` — a single format-1 document, published at
+<https://hytime.github.io/dsh-discover-index/index.json>. Additional **profiles** declared
+in `config/config.yml` each produce their own document (for example a star-floor subset
 published as its own market), and each is validated independently in CI.
+
+### Sources
+
+| What | Where |
+| --- | --- |
+| Upstream catalog (the data) | <https://awesome-dsh-plugin.com/plugins.json> · [awesome-dsh-plugin/awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) |
+| This converter (the code) | <https://github.com/hytime/dsh-discover-index> |
+| Published index (what DSH reads) | <https://hytime.github.io/dsh-discover-index/index.json> |
+
+The index is a **conversion** of the upstream list, not an independent registry. Upstream
+curates and hosts the catalog; this repository only converts it to format 1, checks it
+against the real validator, and republishes it on a daily schedule. A bad entry should be
+reported upstream; a bad *conversion* of a good entry belongs here.
+
+The published document carries that provenance in its own `description`, so the source
+travels with the data and is visible in Discover without consulting this README:
+
+```json
+"description": {
+  "en": "The awesome-dsh-plugin list converted to the plugin market index format 1. Source: https://github.com/hytime/dsh-discover-index",
+  "zh": "由 awesome-dsh-plugin 列表转换而来的插件市场索引（格式 1）。源码：https://github.com/hytime/dsh-discover-index"
+}
+```
 
 ## How upstream data maps to format 1
 
@@ -66,8 +97,8 @@ This is a representative excerpt of the output. It passes
   "format": 1,
   "title": { "en": "DSH Plugin Index", "zh": "DSH 插件索引" },
   "description": {
-    "en": "The awesome-dsh-plugin list converted to the plugin market index format.",
-    "zh": "由 awesome-dsh-plugin 列表转换而来的插件市场索引。"
+    "en": "The awesome-dsh-plugin list converted to the plugin market index format 1. Source: https://github.com/hytime/dsh-discover-index",
+    "zh": "由 awesome-dsh-plugin 列表转换而来的插件市场索引（格式 1）。源码：https://github.com/hytime/dsh-discover-index"
   },
   "metadata": {
     "categories": {
@@ -137,14 +168,22 @@ switch that ships as part of the experimental plugin-markets bundle:
 2. Next to **Experimental plugins**, open **More**.
 3. Switch on **Custom plugin markets**. The Plugins page now gains two tabs:
    **Installed** and **Discover**.
-4. Open **Discover**. Add an index source URL — the published one is
-   `https://hytime.github.io/dsh-discover-index/index.json`.
+4. Open **Discover** → **Add index source**, and paste:
+
+   ```
+   https://hytime.github.io/dsh-discover-index/index.json
+   ```
+
+   That is the only URL needed. It serves a complete format-1 document; there is no
+   companion manifest or API to configure.
 5. Once more than one source is added, use the **market menu** to switch between them.
    Each configured profile is a separate index and therefore a separate market.
 6. Search, filter, and sort the market, then install the plugin you want.
 
 Switching markets is a client-side operation because each profile is published as its
-own complete index — no DSH change is needed to add a market.
+own complete index — no DSH change is needed to add a market. Marketplace titles,
+descriptions and plugin metadata are third-party text and carry no endorsement; the
+`description` above names this repository so the provenance is visible in that list.
 
 ## Adding another source later
 

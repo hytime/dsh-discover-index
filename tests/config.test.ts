@@ -55,6 +55,25 @@ describe('shipped config/config.yml', () => {
     }
   })
 
+  it.skipIf(skipIfMissing(configModule))('records the converter repository in every profile description', () => {
+    // Provenance has to travel with the document, not only live in this
+    // repository: a user who finds the market in Discover sees the profile
+    // description and nothing else. DSH truncates that text at 300 UTF-16 code
+    // units when it hands it to the model, so the URL must be present and the
+    // whole string short enough not to be clipped.
+    const config = lazySrc(configModule, 'config.ts').loadConfig('config/config.yml')
+    for (const profile of config.profiles) {
+      for (const language of ['en', 'zh']) {
+        const text = profile.description?.[language]
+        expect(text, `${profile.id} has no ${language} description`).toBeTruthy()
+        expect(text, `${profile.id}.${language} must name the source repository`)
+          .toContain('https://github.com/hytime/dsh-discover-index')
+        expect(text!.length, `${profile.id}.${language} exceeds DSH's 300-unit clip`)
+          .toBeLessThanOrEqual(300)
+      }
+    }
+  })
+
   it.skipIf(skipIfMissing(configModule))('gives every profile a distinct bare *.json output', () => {
     const config = lazySrc(configModule, 'config.ts').loadConfig('config/config.yml')
     const outputs = config.profiles.map((profile) => profile.output)

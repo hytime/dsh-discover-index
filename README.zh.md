@@ -18,7 +18,26 @@
 
 ## 产出
 
-`dist/index.json`——一份格式 1 文档。`config/config.yml` 中声明的每个 **profile** 各自产出一份文档（例如按星标下限筛选的子集可以单独发布为一个市场），每一份都会在 CI 中独立校验。
+`dist/index.json`——一份格式 1 文档，发布于 <https://hytime.github.io/dsh-discover-index/index.json>。`config/config.yml` 中声明的每个 **profile** 各自产出一份文档（例如按星标下限筛选的子集可以单独发布为一个市场），每一份都会在 CI 中独立校验。
+
+### 来源
+
+| 项 | 地址 |
+| --- | --- |
+| 上游目录（数据） | <https://awesome-dsh-plugin.com/plugins.json> · [awesome-dsh-plugin/awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) |
+| 本项目（转换代码） | <https://github.com/hytime/dsh-discover-index> |
+| 已发布索引（DSH 读取的源） | <https://hytime.github.io/dsh-discover-index/index.json> |
+
+索引是上游列表的**转换产物**，不是独立注册表。上游负责征集与托管目录，本仓库只负责把它转换成格式 1、用真校验器自检、并按日重新发布。某条条目本身有问题，应当去上游报告；某条好条目被**转换错了**，则属于本仓库。
+
+这份出处信息也写进了发布文档自身的 `description`，因此来源会随数据一起传播，在 Discover 里直接可见，无需回来看这份 README：
+
+```json
+"description": {
+  "en": "The awesome-dsh-plugin list converted to the plugin market index format 1. Source: https://github.com/hytime/dsh-discover-index",
+  "zh": "由 awesome-dsh-plugin 列表转换而来的插件市场索引（格式 1）。源码：https://github.com/hytime/dsh-discover-index"
+}
+```
 
 ## 上游数据到格式 1 的映射
 
@@ -47,8 +66,8 @@
   "format": 1,
   "title": { "en": "DSH Plugin Index", "zh": "DSH 插件索引" },
   "description": {
-    "en": "The awesome-dsh-plugin list converted to the plugin market index format.",
-    "zh": "由 awesome-dsh-plugin 列表转换而来的插件市场索引。"
+    "en": "The awesome-dsh-plugin list converted to the plugin market index format 1. Source: https://github.com/hytime/dsh-discover-index",
+    "zh": "由 awesome-dsh-plugin 列表转换而来的插件市场索引（格式 1）。源码：https://github.com/hytime/dsh-discover-index"
   },
   "metadata": {
     "categories": {
@@ -115,11 +134,17 @@ Discover 标签页是**实验性**的，自定义市场还藏在另一个开关�
 1. 打开 **Plugins**。
 2. 在 **Experimental plugins** 旁打开 **More**。
 3. 打开 **Custom plugin markets**。Plugins 页面此时会多出两个标签页：**Installed** 和 **Discover**。
-4. 打开 **Discover**，添加索引来源 URL——已发布的是 `https://hytime.github.io/dsh-discover-index/index.json`。
+4. 打开 **Discover** → **Add index source**，粘贴：
+
+   ```
+   https://hytime.github.io/dsh-discover-index/index.json
+   ```
+
+   只需要这一个 URL。它本身就是一份完整的格式 1 文档，不配套任何 manifest 或 API。
 5. 添加多个来源后，用**市场菜单**在它们之间切换。每个配置的 profile 都是一份独立索引，因而也是一个独立市场。
 6. 在市场内搜索、筛选、排序，然后安装需要的插件。
 
-切换市场是纯客户端操作，因为每个 profile 都发布为一份完整索引——新增市场无需改动 DSH。
+切换市场是纯客户端操作，因为每个 profile 都发布为一份完整索引——新增市场无需改动 DSH。市场标题、描述与插件元数据都是第三方文本，不构成任何背书；上面的 `description` 写明了本仓库地址，因此出处在这份列表里就能看到。
 
 ## 以后如何新增来源
 

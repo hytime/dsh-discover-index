@@ -38,8 +38,17 @@ profiles:
       en: DSH Plugin Index
       zh: DSH 插件索引
     description:
-      en: The awesome-dsh-plugin list converted to the plugin market index format.
-      zh: 由 awesome-dsh-plugin 列表转换而来的插件市场索引。
+      # The source repository travels with the market so a user who finds the
+      # index in Discover can see where it came from and who to report a bad
+      # entry to. DSH shows this text in the market list and returns it to the
+      # model, which truncates it at 300 UTF-16 code units, so keep it to one
+      # sentence plus the URL.
+      #
+      # Quoted because the value contains ": " — in a plain YAML scalar that is
+      # a mapping separator, and the line would parse as a nested key instead of
+      # text.
+      en: 'The awesome-dsh-plugin list converted to the plugin market index format 1. Source: https://github.com/hytime/dsh-discover-index'
+      zh: '由 awesome-dsh-plugin 列表转换而来的插件市场索引（格式 1）。源码：https://github.com/hytime/dsh-discover-index'
     sources:
       - awesome-dsh-plugin
     minStars: 0

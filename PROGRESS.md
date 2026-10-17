@@ -1,7 +1,7 @@
 # 项目进度 / Project status
 
-> 快照时间：**2026-10-17 22:10 CST**（上一版为 21:46；本次修复了 deny 名单缺陷）
-> 分支 `main`，工作区改动待提交。上一版标记的唯一已知缺陷已修复并有回归测试锁定。
+> 快照时间：**2026-10-17 22:15 CST**（上一版 21:46；本次修复 deny 缺陷、修正 pnpm 配置、完成发布）
+> 分支 `main`，已推送，CI 两个工作流均实跑成功，索引已上线。
 
 ---
 
@@ -13,22 +13,24 @@
 
 ---
 
-## 当前状态：代码完成且已验证；发布链路未启动
+## 当前状态：全部完成并已验证上线
 
 | 项 | 状态 | 证据 |
 |---|---|---|
 | TypeScript 编译 | ✅ | `tsc -p tsconfig.json --noEmit` 退出码 0 |
 | 测试 | ✅ | `vitest run` → **327 通过 / 1 跳过 / 0 失败**（9 个文件，全离线） |
-| 真实校验器验证 | ✅ | 产物经 `@deepseek-ai/dsh-plugin-market-index` 校验通过 |
-| 全量构建 | ✅ | 5451 个插件（2587 npm + 2864 git） |
+| 真实校验器验证 | ✅ | 线上产物经 `@deepseek-ai/dsh-plugin-market-index` 校验通过 |
+| 全量构建 | ✅ | 5452 个插件（2587 npm + 2865 git） |
 | deny 名单 fail-open | ✅ 已修复 | 见下方「已修复」；`git+https` / SSH / 非 GitHub 域名均被拒绝 |
-| Git | 🟡 | 3 次提交，本次修复待提交 |
-| GitHub 仓库 | ❌ | `hytime/dsh-discover-index` **不存在** |
-| remote / push | ❌ | 无 remote，未推送 |
-| GitHub Pages | ❌ | 未开启，README 里的索引 URL 目前 404 |
-| CI 工作流实跑 | ❌ | 从未在 Actions 中运行过 |
+| Git | ✅ | 4 次提交，已推送 `main` |
+| GitHub 仓库 | ✅ | <https://github.com/hytime/dsh-discover-index> |
+| GitHub Pages | ✅ | <https://hytime.github.io/dsh-discover-index/index.json> 返回 200 |
+| CI 工作流实跑 | ✅ | `Validate` 1m50s 通过；`Build and deploy index` build 2m29s + deploy 12s 通过 |
+| 自动化 | ✅ | 每日 cron `17 6 * * *` 已生效，另支持 `workflow_dispatch` |
 
 ### 最近一次全量构建的事实
+
+本地运行：
 
 ```
 node dist/cli.js build
@@ -38,9 +40,11 @@ node dist/cli.js build
   → dist/index.json ≈ 7.7 MB
 ```
 
+线上（CI 冷启动、无缓存）：5452 个插件，7.73 MB，真校验器通过。
+
 拒绝原因分布：policy 197（144 + 53 为重复包名）、resolve 56（30 仓库不可达 / 16 无 `dsh.bundle` / 3 无可用 name+version / 5 包名非法 / 2 路径无 `package.json`）。
 
-> 数字比上一版各少 1（5452 → 5451、5649 → 5648、resolve 55 → 56）属于每次运行都会有的上游抖动：目录条目在变、仓库 HEAD 在动。不是回归。
+> 本地与线上相差 1 个插件属于每次运行都会有的上游抖动：目录条目在变、仓库 HEAD 在动。不是回归。
 
 ---
 
@@ -120,13 +124,28 @@ const identity = candidate.repository ? repoIdentity(candidate.repository.url) :
 
 **验证**：`sourceUrl` 不出现在渲染产物中（`JSON.stringify(doc).includes('sourceUrl') === false`）；全量产物 5451 个插件经真校验器通过，且不含 `deepseek-harness`。
 
-### 其他未完成
+### 第二个缺陷：pnpm 构建脚本批准键（CI 实跑才发现）
 
-1. **GitHub 仓库未创建** → 无 remote、无 push。
-2. **Pages 未开启** → 索引 URL 404。
-3. **两个工作流从未真跑**：只做了语法与片段级验证。`build.yml` 还需注意：它引用了 `data/resolve-cache.json` 的 `actions/cache`，但该缓存文件被 `.gitignore` 忽略 —— 冷启动时第一步会回退为全量解析（约 3084 次请求），这是预期行为但耗时长。
-4. `dist/` 是上一次运行的产物，已被 gitignore；CI 会重新生成。
-5. pnpm 配置已迁至 [`pnpm-workspace.yaml`](pnpm-workspace.yaml)（pnpm 10+ 不再读 `package.json` 的 `pnpm` 字段），并加了 `packageManager: pnpm@11.7.0`；CI 里钉的是 pnpm 9，与本地 11.7 存在版本差，未实测。
+第一条真实 CI 运行在 `pnpm install --frozen-lockfile` 就失败了：
+
+```
+[ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: esbuild@0.21.5, esbuild@0.28.2
+```
+
+根因：pnpm 11 只认 [`pnpm-workspace.yaml`](pnpm-workspace.yaml) 里的 **`allowBuilds` 映射形式**。仓库当时写的是 `onlyBuiltDependencies` —— 它被**接受但不生效**，而"未批准的构建脚本"在 pnpm 11 是**硬错误**而非警告，于是安装退出码 1。
+
+**为什么本地一路绿灯**：本机的 pnpm store 里已经有 esbuild 的平台二进制，安装时无需重新执行 postinstall，所以这个错误只在干净环境里出现。这也是"本地全绿不等于 CI 能过"的典型样本。
+
+**修复**：改成 `allowBuilds: { esbuild: true }`。用 A/B 对照实验确认：`onlyBuiltDependencies` 退出码 1，`allowBuilds` 退出码 0 并成功拉取平台二进制。验证方式是从 `git archive` 导出的干净目录跑完整 CI 序列（frozen install → typecheck → test → build），而不是在已预热的工作区里跑。
+
+顺带修正了 CI 的 pnpm 版本锚点：`pnpm/action-setup@v4` 不再钉 `version: 9`，改为读取 `package.json` 的 `packageManager: pnpm@11.7.0`，与写出 `pnpm-lock.yaml` 的版本一致。
+
+### 剩余已知事项（均不阻塞）
+
+1. **`build.yml` 冷启动耗时长**：grep 了 `data/resolve-cache.json` 的 `actions/cache` 恢复逻辑，但该文件被 `.gitignore` 忽略，首次运行必然回退为全量解析（约 3000 次请求，实测 build job 2m29s）。这是预期行为，后续运行会命中缓存。
+2. **GitHub Actions 的 Node 20 弃用告警**：`checkout@v4` / `setup-node@v4` / `pnpm/action-setup@v4` 等仍以 Node 20 为目标，被 runner 强制在 Node 24 上跑。当前可用，未来需要升级 action 大版本。
+3. `dist/` 是本地产物，已被 gitignore；线上由 CI 生成。
+4. 上游数据每次运行都会抖动 ±数条（目录条目增减、仓库 HEAD 变化），本地与线上数字不必完全一致。
 
 ---
 
