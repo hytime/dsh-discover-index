@@ -160,7 +160,9 @@ const identity = candidate.repository ? repoIdentity(candidate.repository.url) :
 ### 剩余已知事项（均不阻塞）
 
 1. **`build.yml` 冷启动耗时长**：`actions/cache` 恢复的是 `data/resolve-cache.json`，而该文件被 `.gitignore` 忽略，因此首次运行必然回退为全量解析（约 3000 次请求，实测 build job 2m29s）。这是预期行为，后续运行会命中缓存。
-2. **GitHub Actions 的 Node 20 弃用告警**：`checkout@v4` / `setup-node@v4` / `pnpm/action-setup@v4` 等仍以 Node 20 为目标，被 runner 强制在 Node 24 上跑。当前可用，未来需要升级 action 大版本。
+2. ~~**GitHub Actions 的 Node 20 弃用告警**~~ —— **已解决（`96fe7d0`）**：六个 action 全部升到声明 `using: node24` 的大版本（checkout v7 / setup-node v7 / cache v6 / upload-pages-artifact v5 / deploy-pages v5 / pnpm/action-setup v6）。实测该次运行的原始日志中 `Node.js 20 is deprecated` 出现 **0 次**。
+
+   > 后续可考虑：pnpm 已将 `pnpm/action-setup` 标记为 pnpm v11+ 的过时做法，继任者 `pnpm/setup` 能同时安装运行时，一步替代 setup-pnpm + setup-node。当前两步组合工作正常，改它会同时动两处，宜作为独立变更。
 3. `dist/` 是本地产物，已被 gitignore；线上由 CI 生成。
 4. 上游数据每次运行都会抖动 ±数条（目录条目增减、仓库 HEAD 变化），本地与线上数字不必完全一致。
 
