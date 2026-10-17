@@ -88,6 +88,12 @@ export function npmCandidate(entry: UpstreamEntry, sourceId: string): Candidate 
     author: entry.owner,
     homepage: entry.url,
     icon: iconFor(entry),
+    // The URL the source published, kept verbatim for policy decisions. It is
+    // deliberately separate from `repository` below, which format 1 constrains
+    // to canonical https URLs and which is therefore absent for shapes such as
+    // npm's `git+https://…` form. A deny rule that could only see `repository`
+    // would fail open on exactly those shapes.
+    sourceUrl: entry.url,
     ...(location === undefined
       ? {}
       : {

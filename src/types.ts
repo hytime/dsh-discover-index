@@ -45,6 +45,19 @@ export interface Candidate {
   readonly icon?: string
   /** Display-only repository facts. */
   readonly repository?: { readonly url: string; readonly directory?: string }
+  /**
+   * The source URL this candidate was derived from, exactly as the source
+   * published it. Internal only — never rendered.
+   *
+   * `repository` cannot serve this purpose. It is a display field constrained
+   * by format 1 to canonical `https://` URLs, so a resolver that cannot
+   * decompose a URL leaves it unset, and anything reading it to decide policy
+   * silently sees nothing. That asymmetry is dangerous for a deny rule: the
+   * question "must this entry never be listed?" has to be answerable from
+   * whatever the source actually said, including npm's `git+https://…` form,
+   * an SSH URL, or a non-GitHub host.
+   */
+  readonly sourceUrl?: string
   readonly category?: string
   readonly keywords: readonly string[]
   readonly labels: readonly string[]

@@ -31,10 +31,12 @@ jobs:
 
       # pnpm/action-setup must run BEFORE actions/setup-node: setup-node's
       # `cache: pnpm` shells out to the pnpm binary to locate the store.
+      #
+      # No `version:` here on purpose. pnpm/action-setup reads the
+      # `packageManager` field from package.json when the input is omitted, so
+      # CI uses exactly the pnpm that wrote pnpm-lock.yaml.
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Setup Node
         uses: actions/setup-node@v4

@@ -12,7 +12,9 @@
 
 ## 状态
 
-流水线与这些 workflow 仍在建设中。在 CLI 完成、并且 CI 里真正跑过一次 `node dist/cli.js build` 之前，请把已发布的索引地址和这些 workflow 都视为**未经验证**。参见[本地运行](#本地运行)。
+流水线已完成并在本地验证：TypeScript 编译通过、测试套件离线全绿、完整跑一次 `node dist/cli.js build` 产出的索引能被真正的 `@deepseek-ai/dsh-plugin-market-index` 校验器接受。
+
+这些 workflow 尚未在 Actions 中实际运行，仓库也还没发布，所以上面的索引地址目前不可用。在定时任务真正部署一次之前，请把它视为未经验证。参见[本地运行](#本地运行)。
 
 ## 产出
 

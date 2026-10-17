@@ -134,6 +134,9 @@ export function gitCandidate(
     author: entry.owner,
     homepage: entry.url,
     repository: directory === undefined ? { url: location.repo } : { url: location.repo, directory },
+    // Kept for policy, which must see the URL the source published rather than
+    // the canonical form above.
+    sourceUrl: entry.url,
     ...(entry.category === undefined ? {} : { category: entry.category }),
     keywords: ['dsh', 'dsh-plugin', 'deepseek-harness'],
     labels: [],

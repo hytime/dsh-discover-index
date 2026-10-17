@@ -16,9 +16,13 @@ Published index: <https://hytime.github.io/dsh-discover-index/index.json>
 
 ## Status
 
-The pipeline and these workflows are under active construction. Treat the published
-index URL and the workflows as **unverified** until the CLI is complete and a real
-`node dist/cli.js build` has run in CI. See [Running locally](#running-locally).
+The pipeline is complete and verified locally: TypeScript compiles, the test suite passes
+offline, and a full `node dist/cli.js build` produces an index that the real
+`@deepseek-ai/dsh-plugin-market-index` validator accepts.
+
+The workflows have not yet run in Actions, and the repository is not published, so the
+index URL above is not live. Treat it as unverified until a scheduled run has deployed it.
+See [Running locally](#running-locally).
 
 ## What it produces
 

@@ -291,18 +291,19 @@ describe.skipIf(skipIfMissing(render))('GATE: version grammar edge cases (was GA
 })
 
 /**
- * Deny-list coverage: `deepseek-ai/deepseek-harness` must never be listed, and
- * `applyDenyLists` identifies a repository through `repoIdentity`, which only
- * understands `https://github.com/...` URLs.
+ * Deny-list coverage: `deepseek-ai/deepseek-harness` must never be listed.
  *
- * For the live catalog that is sufficient — every one of the 5,704 recorded
- * entries is a plain github.com URL, so the rule always has an identity to
- * match. But the rule FAILS OPEN for any other URL shape: the entry survives
- * with no repository and no rejection. Given case 5 is the one wrong entry
- * every visitor would notice, fail-open is the wrong default, and a future
- * source adapter that normalises `repository.url` differently (npm's own
- * `git+https://github.com/o/r.git` form, say) would silently reintroduce the
- * product into its own plugin list.
+ * These cases are the ones that caught a real defect. The deny rule used to
+ * read `candidate.repository`, a display field format 1 constrains to canonical
+ * `https://github.com/…` URLs. A candidate derived from npm's `git+https://…`
+ * form, an SSH URL, or a non-GitHub host therefore carried no `repository` at
+ * all, so the rule saw nothing and let the entry through — it failed OPEN, in
+ * the direction where the surviving entry is the one a visitor would notice.
+ *
+ * The fix: `Candidate.sourceUrl` keeps the URL exactly as the source published
+ * it, and the rule derives identity from every URL the candidate carries. The
+ * assertions below previously documented the fail-open behaviour as a known
+ * gap; they now assert that the gap is closed, and would fail if it reopened.
  */
 
 const policyModule = await loadSrc<any>('policy/filter.ts')
@@ -358,43 +359,45 @@ describe.skipIf(skipIfMissing(policyModule))('denyRepos: which URL shapes the ru
     expect(result.rejections).toHaveLength(1)
   })
 
-  it('GAP 8 — FAILS OPEN for a non-GitHub host', () => {
+  it('denies a non-GitHub host', () => {
     const url = 'https://gitlab.com/deepseek-ai/deepseek-harness'
     const result = policy.applyPolicy([candidateFor(url)], config(DENY), 0)
-    // Today: the entry survives, and because the URL is not a GitHub
-    // repository it carries no `repository` field at all — so nothing even
-    // records where it came from.
-    expect(result.candidates).toHaveLength(1)
-    expect(result.candidates[0]?.repository).toBeUndefined()
-    expect(result.rejections).toEqual([])
+    // The candidate carries no `repository` field for this URL shape, which is
+    // precisely what used to make the rule fail open. Identity now comes from
+    // the source URL too.
+    expect(candidateFor(url).repository).toBeUndefined()
+    expect(result.candidates).toEqual([])
+    expect(result.rejections).toHaveLength(1)
   })
 
-  it("GAP 9 — FAILS OPEN for npm's git+https URL form", () => {
+  it("denies npm's git+https URL form", () => {
     const url = 'git+https://github.com/deepseek-ai/deepseek-harness.git'
+    const result = policy.applyPolicy([candidateFor(url)], config(DENY), 0)
+    expect(result.candidates).toEqual([])
+    expect(result.rejections).toHaveLength(1)
+  })
+
+  it('denies the SCP-like SSH form, which `new URL` cannot parse', () => {
+    const url = 'git@github.com:deepseek-ai/deepseek-harness.git'
+    const result = policy.applyPolicy([candidateFor(url)], config(DENY), 0)
+    expect(result.candidates).toEqual([])
+    expect(result.rejections).toHaveLength(1)
+  })
+
+  it('keeps a third-party plugin whose repository merely starts with the denied name', () => {
+    // The deny list is an exact `owner/repo` match, not a prefix match: 45 live
+    // entries mention deepseek-harness in their URL and all are third-party.
+    const url = 'https://github.com/pengyue-polaron/deepseek-harness-genui'
     const result = policy.applyPolicy([candidateFor(url)], config(DENY), 0)
     expect(result.candidates).toHaveLength(1)
     expect(result.rejections).toEqual([])
   })
 
-  it('shows that a surviving entry validates into the published index', () => {
-    // The consequence, stated through the real validator: fail-open means a
-    // plugin named deepseek-harness is perfectly acceptable format 1.
-    const result = policy.applyPolicy(
-      [candidateFor('https://gitlab.com/deepseek-ai/deepseek-harness')],
-      config(DENY),
-      0,
-    )
-    const parsed = parseMarketIndex(
-      render!.renderIndex([result.candidates[0]!], profile),
-      TEST_INDEX_URL,
-    )
-    expect(parsed.plugins.map((plugin) => plugin.name)).toEqual(['deepseek-harness'])
-  })
-
-  it('records that the live catalog is all github.com, so the gap is latent', () => {
+  it('records that the live catalog is all github.com, so the gap was latent', () => {
     // Verified in RECON.md: every one of the 5,704 recorded entries is a plain
     // https://github.com/owner/repo URL, and none is owned by deepseek-ai. The
-    // gap therefore needs a differently-shaped source URL to become active.
+    // defect needed a differently-shaped source URL to become active — which is
+    // why it had to be fixed before a second source adapter landed.
     const meta = fixtureJson<{ reconCounts: Record<string, number> }>('meta.json')
     expect(meta.reconCounts['entriesOwnedBy_deepseek_ai']).toBe(0)
     expect(meta.reconCounts['uniqueOwnerRepoPairs']).toBe(5505)

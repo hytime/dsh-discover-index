@@ -15,11 +15,36 @@ function stars(candidate: Candidate): number {
 }
 
 /**
+ * Every repository identity a candidate can be recognised by.
+ *
+ * A deny rule must be answerable from whatever the source actually said, so
+ * this collects identities from every URL the candidate carries rather than
+ * from `repository` alone. That distinction is the whole point: `repository` is
+ * a display field format 1 constrains to canonical https URLs, so a resolver
+ * facing npm's `git+https://github.com/o/r.git` form, an SSH URL, or a
+ * non-GitHub host leaves it unset — and a rule reading only `repository` would
+ * then see nothing and let the entry through. Fail-open is the wrong default
+ * for the one entry a visitor would recognise as not being a plugin.
+ *
+ * @param candidate - candidate to identify.
+ * @returns every distinct lowercase `owner/repo` identity its URLs yield.
+ */
+export function repositoryIdentities(candidate: Candidate): string[] {
+  const identities = new Set<string>()
+  for (const url of [candidate.sourceUrl, candidate.repository?.url, candidate.homepage]) {
+    if (url === undefined) continue
+    const identity = repoIdentity(url)
+    if (identity !== undefined) identities.add(identity.toLowerCase())
+  }
+  return [...identities]
+}
+
+/**
  * Drop entries that are not plugins at all, and packages excluded by hand.
  *
- * The repository identity is matched against `denyRepos` as well as the
- * candidate's own repository URL, because the URL may point at a monorepo
- * subdirectory: only the identity form reliably names the repository.
+ * Identity is matched from every URL the candidate carries, not from
+ * `repository` alone, so a URL shape the resolver declined to decompose cannot
+ * slip past the rule.
  *
  * @param candidates - candidates to filter.
  * @param config - project configuration carrying the deny lists.
@@ -35,9 +60,9 @@ export function applyDenyLists(
   const rejections: Rejection[] = []
 
   for (const candidate of candidates) {
-    const identity = candidate.repository ? repoIdentity(candidate.repository.url) : undefined
-    if (identity && denyRepos.has(identity.toLowerCase())) {
-      rejections.push({ id: identity, stage: 'policy', reason: 'repository is on the deny list (not a plugin)' })
+    const denied = repositoryIdentities(candidate).find((identity) => denyRepos.has(identity))
+    if (denied !== undefined) {
+      rejections.push({ id: denied, stage: 'policy', reason: 'repository is on the deny list (not a plugin)' })
       continue
     }
     if (denyPackages.has(candidate.name)) {
