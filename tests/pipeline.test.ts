@@ -57,13 +57,22 @@ function stubFetch(seen: string[]): typeof fetch {
   }) as typeof fetch
 }
 
-/** Run the pipeline offline with no git resolution budget. */
+/**
+ * Run the pipeline offline with no git resolution budget.
+ *
+ * `registryVersions: false` because this suite's contract is "no request
+ * leaves the recording". The registry stage would add one request per npm
+ * candidate, which is correct behaviour but not what these fixtures record;
+ * `tests/version-history.test.ts` covers that stage against recorded
+ * packuments instead.
+ */
 async function runOffline(profiles: string[] = ['index']) {
   const seen: string[] = []
   const result = await pipeline!.runPipeline({
     configPath: fixturePath('config.fixture.yml'),
     profiles,
     resolveLimit: 0,
+    registryVersions: false,
     fetchImpl: stubFetch(seen),
   })
   return { result, seen }

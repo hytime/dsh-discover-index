@@ -43,7 +43,7 @@ export interface GitDeps {
 }
 
 /** The slice of a package manifest this resolver reads. */
-interface Manifest {
+export interface Manifest {
   readonly name?: unknown
   readonly version?: unknown
   readonly dsh?: unknown
@@ -66,7 +66,7 @@ export function declaresBundle(manifest: Manifest): boolean {
 }
 
 /** `engines.dsh`, the version range the plugin declares it runs on. */
-function dshRange(manifest: Manifest): string | undefined {
+export function dshRange(manifest: Manifest): string | undefined {
   const engines = manifest.engines
   if (!isRecord(engines)) return undefined
   const range = engines.dsh

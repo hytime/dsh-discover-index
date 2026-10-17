@@ -91,6 +91,30 @@ export interface SourceContext {
   readonly log: (message: string) => void
 }
 
+/**
+ * Matched against the raw upstream entry to decide which capabilities and
+ * red lines it carries.
+ *
+ * A `kind` is an adapter's name for a document shape; `fields` is the mapping
+ * from that shape's members to the pipeline's vocabulary. Keeping the mapping
+ * in configuration rather than in the adapter is what makes a second catalog
+ * format a configuration change instead of a code change: the adapter only has
+ * to hand over the raw entry, and the mapping decides what it means.
+ */
+export interface FieldMapping {
+  /**
+   * Member path holding the entry's permission capabilities, such as
+   * `capabilities`. Dot-separated for nesting; a missing path means none.
+   */
+  readonly capabilities?: string
+  /** Member path holding the entry's red-line findings, such as `capabilityRedLines`. */
+  readonly redLines?: string
+  /** Member path holding free-form discovery tags, folded into `keywords`. */
+  readonly keywords?: string
+  /** Member path holding a numeric popularity value, exposed as a sort key. */
+  readonly sortKey?: { readonly path: string; readonly id: string }
+}
+
 /** One configured upstream source. */
 export interface SourceConfig {
   readonly id: string
@@ -102,6 +126,11 @@ export interface SourceConfig {
   readonly url?: string
   /** Lower number wins when two candidates carry the same package name. */
   readonly priority: number
+  /**
+   * How this source's raw entries map onto the pipeline's vocabulary. Absent
+   * means the adapter's own defaults, which are the upstream catalog's shape.
+   */
+  readonly fields?: FieldMapping
 }
 
 /** A named bundle of enabled sources; the thing a user switches between. */

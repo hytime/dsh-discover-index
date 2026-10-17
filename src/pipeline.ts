@@ -23,6 +23,8 @@ import { applyPolicy } from './policy/filter.js'
 import { renderIndex, validateIndex, type MarketIndexDocument } from './render/index.js'
 import { unrenderableReason } from './render/index.js'
 import { HttpClient, HttpError, mapLimit } from './util/http.js'
+import { DEFAULT_REGISTRY, packumentUrl, withPackument } from './resolve/npm.js'
+import { declaresBundle } from './resolve/git.js'
 
 /** A remembered git resolution, so a daily run pays only for what changed. */
 export interface ResolvedGitEntry {
@@ -93,6 +95,16 @@ export interface RunOptions {
   readonly now?: Date
   /** Concurrency for git resolution; git and raw.githubusercontent tolerate more than the REST API. */
   readonly gitConcurrency?: number
+  /**
+   * Whether to read each npm package's registry document for its full version
+   * history. Default true. Tests and offline runs turn it off, and so does
+   * anyone who wants the upstream single version exactly as published.
+   */
+  readonly registryVersions?: boolean
+  /** npm registry base URL, ending in `/`. */
+  readonly registry?: string
+  /** Registry documents read at once. */
+  readonly registryConcurrency?: number
 }
 
 /**
@@ -263,6 +275,47 @@ export async function runPipeline(options: RunOptions = {}): Promise<RunResult> 
     }
     bySource.set(source.id, candidates)
     log(`source ${source.id}: ${String(candidates.length)} candidates`)
+  }
+
+  // ---- expand npm candidates to every installable version -----------------
+  // Upstream names one version per entry; the registry knows them all. This
+  // stage runs after resolution and before selection, so its cost and its
+  // failures are attributable to one step.
+  //
+  // Best-effort by design: a package whose registry document cannot be read
+  // keeps its single upstream version. Turning a registry outage into a market
+  // that lists fewer plugins would be a worse failure than listing one version.
+  if (options.registryVersions !== false) {
+    const registry = options.registry ?? DEFAULT_REGISTRY
+    let gainedPlugins = 0
+    let gainedVersions = 0
+    for (const [sourceId, candidates] of bySource) {
+      const npmOnes = candidates.filter((candidate) =>
+        candidate.versions.length === 1 && candidate.versions[0]?.source.type === 'npm')
+      if (npmOnes.length === 0) continue
+      log(`source ${sourceId}: reading ${String(npmOnes.length)} registry documents for version history`)
+      const enriched = await mapLimit(
+        npmOnes,
+        async (candidate) => {
+          const url = packumentUrl(registry, candidate.name)
+          const packument = await http.jsonOr404<unknown>(url).catch(() => undefined)
+          return packument === undefined ? candidate : withPackument(candidate, packument, (manifest) => declaresBundle(manifest as Parameters<typeof declaresBundle>[0]))
+        },
+        options.registryConcurrency ?? 12,
+      )
+      const byName = new Map(enriched.map((candidate) => [candidate.name, candidate]))
+      for (let index = 0; index < candidates.length; index += 1) {
+        const current = candidates[index] as Candidate
+        const replacement = byName.get(current.name)
+        if (replacement === undefined) continue
+        if (replacement.versions.length > current.versions.length) {
+          gainedPlugins += 1
+          gainedVersions += replacement.versions.length - current.versions.length
+        }
+        candidates[index] = replacement
+      }
+    }
+    log(`version history: ${String(gainedPlugins)} plugins gained ${String(gainedVersions)} further versions`)
   }
 
   // ---- select, render, validate ------------------------------------------

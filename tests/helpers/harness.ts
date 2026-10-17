@@ -225,6 +225,11 @@ export interface PipelineModule {
     log?: (message: string) => void
     resolveLimit?: number
     gitConcurrency?: number
+    /** Whether to read each npm package's registry document for its full version history. */
+    registryVersions?: boolean
+    /** npm registry base URL, ending in `/`. */
+    registry?: string
+    registryConcurrency?: number
   }): Promise<PipelineRunResult>
 }
 

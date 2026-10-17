@@ -21,6 +21,7 @@ import {
   type MarketIndex,
 } from '@deepseek-ai/dsh-plugin-market-index'
 import type { Candidate, Profile } from '../types.js'
+import { labelTitle } from '../resolve/discovery.js'
 
 /** The document this project writes; the validator is what proves it well-formed. */
 export interface MarketIndexDocument {
@@ -291,9 +292,12 @@ export function renderIndex(candidates: readonly Candidate[], profile: Profile):
   }
   const labelDeclarations: Record<string, { title: Record<string, string> }> = {}
   for (const label of [...labels].sort()) {
-    labelDeclarations[label] = {
-      title: label === 'popular' ? { en: 'Popular', zh: '热门' } : fallbackTitle(label),
-    }
+    // `labelTitle` is total and owns the vocabulary: capabilities, risk
+    // classes, and popularity buckets all get their localized title from there,
+    // and an id it has never seen falls back to itself rather than becoming a
+    // validator failure. Sorting keeps the published document stable across
+    // runs, since the set is built by set-membership rather than insertion.
+    labelDeclarations[label] = { title: { ...labelTitle(label) } }
   }
 
   const description = cleanLocalized(profile.description)

@@ -27,13 +27,39 @@
 
 `dist/index.json`——一份格式 1 文档，发布于 <https://hytime.github.io/dsh-discover-index/index.json>。`config/config.yml` 中声明的每个 **profile** 各自产出一份文档（例如按星标下限筛选的子集可以单独发布为一个市场），每一份都会在 CI 中独立校验。
 
+### 市场声明了什么
+
+格式 1 允许市场发布自己的策展词表，Discover 会全部渲染出来。本市场四个维度都有用到：
+
+| 维度 | 声明的内客 | 在 Discover 里得到什么 |
+| --- | --- | --- |
+| `metadata.categories` | 上游 23 个分类，含中文标题 | 列表上方的分类胶囊 |
+| `metadata.labels` | 权限能力、风险发现、热度分档 | **标签**筛选菜单与卡片上的标签 |
+| `metadata.sortKeys` | `stars`、`downloads`、`added` | **排序**菜单项，各自默认降序 |
+| `metadata.keywords` | 运行时标识、分类、能力词 | 全文搜索的召回 |
+
+其中**标签**最有用，因为它能回答上游目录本身答不了的问题。标签来自三处：
+
+- **能力**——上游的信任扫描会报告每个插件代码能触达什么：`fs-read`、`fs-write`、`network`、`shell`、`env`、`credentials`、`llm`、`host-runtime`、`dynamic-code`、`subagent`。筛 `shell` 就能找出所有能在你机器上执行命令的插件。
+- **风险发现**，被归一化成五类，而不是上游发布的那 86 句原始描述（大多只提到某一个域名或 IP）：`risk:credentials-and-network`（476 条）、`risk:plaintext-http`（97）、`risk:literal-ip`（47）、`risk:install-time-code`（22）、`risk:dynamic-code`。
+- **热度分档**——`stars:1k+` / `100+` / `10+` / `1+` / `0`，以及 `downloads:10k+` / `1k+` / `100+` / `1+` / `0`。
+
+热度用分档而非精确值，这是格式的硬约束：label id 在索引里只声明一次、由插件**引用**，因此不存在「每个插件自己的 label 值」。用精确值需要 235 个星标标签、1690 个下载量标签，筛选菜单会变得不可用。精确数字仍然在它们该在的地方——`stars` 与 `downloads` 排序键，DSH 还会通过 `plugin_market` 工具把它们交给模型。
+
 ### 来源
 
 | 项 | 地址 |
 | --- | --- |
 | 上游目录（数据） | <https://awesome-dsh-plugin.com/plugins.json> · [awesome-dsh-plugin/awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) |
+| 版本历史（npm） | <https://registry.npmjs.org/>——每个 npm 包一份文档 |
 | 本项目（转换代码） | <https://github.com/hytime/dsh-discover-index> |
 | 已发布索引（DSH 读取的源） | <https://hytime.github.io/dsh-discover-index/index.json> |
+
+### 版本历史
+
+上游每条只给一个版本。DSH 的插件页会列出它能安装的每个版本，并通过 `engines.dsh` 拒绝当前 DSH 不满足的版本——而每个插件只有一个版本时，这两件事都没有意义。因此构建时会读取每个 npm 包的 registry 文档，列出所有声明了 `dsh.bundle`、未被废弃、且有发布时间的版本（2607 份文档，冷启动约 150 MB）。
+
+Git 解析的插件仍然只列它们固定提交里的那一个版本。registry 不可达不致命：该插件保留上游版本，因为让一次 registry 故障导致插件消失，比只显示一个版本更糟。
 
 索引是上游列表的**转换产物**，不是独立注册表。上游负责征集与托管目录，本仓库只负责把它转换成格式 1、用真校验器自检、并按日重新发布。某条条目本身有问题，应当去上游报告；某条好条目被**转换错了**，则属于本仓库。
 

@@ -38,6 +38,65 @@ runs as upstream gains, loses, and re-pins repositories. That is expected. See
 in `config/config.yml` each produce their own document (for example a star-floor subset
 published as its own market), and each is validated independently in CI.
 
+### What the market declares
+
+Format 1 lets a market publish its own curated vocabulary, and Discover renders all of
+it. This market uses each axis:
+
+| Axis | What is declared | What it gives you in Discover |
+| --- | --- | --- |
+| `metadata.categories` | Upstream's 23 categories, translated | The category pills above the list |
+| `metadata.labels` | Permission capabilities, risk findings, popularity buckets | The **Labels** filter menu and the tags on each card |
+| `metadata.sortKeys` | `stars`, `downloads`, `added` | **Sort** menu entries, each opening descending |
+| `metadata.keywords` | Runtime identity, category, and capability words | Free-text search recall |
+
+**Labels** are the most useful of the four, because they answer questions the upstream
+catalog cannot. They come from three places:
+
+- **Capabilities** — upstream's trust scan reports what each plugin's code can reach:
+  `fs-read`, `fs-write`, `network`, `shell`, `env`, `credentials`, `llm`,
+  `host-runtime`, `dynamic-code`, `subagent`. Filtering for `shell` finds every plugin
+  that can run commands on your machine.
+- **Risk findings**, normalised into five classes rather than the 86 raw sentences
+  upstream publishes (most name a single domain or IP): `risk:credentials-and-network`
+  (476 entries), `risk:plaintext-http` (97), `risk:literal-ip` (47),
+  `risk:install-time-code` (22), and `risk:dynamic-code`.
+- **Popularity buckets** — `stars:1k+` / `100+` / `10+` / `1+` / `0` and
+  `downloads:10k+` / `1k+` / `100+` / `1+` / `0`.
+
+Popularity is bucketed rather than exact, and that is a format constraint: a label id is
+declared once and *referenced* by plugins, so there is no per-plugin label value. Exact
+values would need 235 labels for stars and 1,690 for downloads, which turns the filter
+menu into an unusable list. The exact numbers are still there where they matter — they
+are the `stars` and `downloads` sort keys, and DSH hands them to the model through its
+`plugin_market` tool.
+
+### Sources
+
+| What | Where |
+| --- | --- |
+| Upstream catalog (the data) | <https://awesome-dsh-plugin.com/plugins.json> · [awesome-dsh-plugin/awesome-dsh-plugin](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) |
+| Version history (npm) | <https://registry.npmjs.org/> — one document per npm package |
+| This converter (the code) | <https://github.com/hytime/dsh-discover-index> |
+| Published index (what DSH reads) | <https://hytime.github.io/dsh-discover-index/index.json> |
+
+The index is a **conversion** of the upstream list, not an independent registry. Upstream
+curates and hosts the catalog; this repository only converts it to format 1, checks it
+against the real validator, and republishes it on a daily schedule. A bad entry should be
+reported upstream; a bad *conversion* of a good entry belongs here.
+
+### Version history
+
+Upstream names exactly one version per entry. DSH's plugin page lists every version it can
+install and refuses those the running DSH does not satisfy through `engines.dsh` — neither
+of which means anything with a single version per plugin. The build therefore reads each
+npm package's registry document and lists every version that declares `dsh.bundle`, is not
+deprecated, and has a publish time (2,607 documents, roughly 150 MB on a cold run).
+
+Git-resolved plugins still list the one version their pinned commit declares. A registry
+that cannot be reached is not fatal: the plugin keeps its upstream version, because losing
+a plugin to a registry outage would be worse than showing one version of it.
+
 ### Sources
 
 | What | Where |

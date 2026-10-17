@@ -7,8 +7,11 @@
  * registry needs no build step on the user's machine. It is converted with no
  * network call at all.
  */
-import type { Candidate } from '../types.js'
+import semver from 'semver'
+import type { Candidate, ResolvedVersion } from '../types.js'
 import { avatarUrl, decomposeRepoUrl, repoIdentity } from './urls.js'
+import { keywordsFor, labelsFor, popularityLabels } from './discovery.js'
+import { MAX_PUBLISH_TIMESTAMP, dshRangeProblem, versionProblem } from './version-rules.js'
 
 /** One normalized upstream entry. */
 export interface UpstreamEntry {
@@ -28,7 +31,29 @@ export interface UpstreamEntry {
   readonly added?: string
   /** Prebuilt release tarball, when the project publishes one. */
   readonly tarball?: string
+  /**
+   * Permission capabilities the upstream trust scan found, such as `fs-write`
+   * or `network`. Upstream publishes these as a closed vocabulary of ids.
+   */
+  readonly capabilities?: readonly string[]
+  /**
+   * Trust findings from the same scan, as prose sentences. Normalised into
+   * risk labels rather than published verbatim; see `resolve/discovery.ts`.
+   */
+  readonly redLines?: readonly string[]
+  /** Discovery keywords the source itself published, when it has any. */
+  readonly keywords?: readonly string[]
 }
+
+/**
+ * Keywords true of every plugin in this market.
+ *
+ * Format 1 treats `metadata.keywords` as free text for discovery, and the
+ * search engine indexes it. The identifier of the runtime is the useful
+ * constant: a reader searching "dsh" or "harness" should match every entry.
+ */
+export const IDENTITY_KEYWORDS: readonly string[] = ['dsh', 'dsh-plugin', 'deepseek-harness']
+
 
 /**
  * Upstream's date-only `added` field as Unix seconds.
@@ -102,8 +127,8 @@ export function npmCandidate(entry: UpstreamEntry, sourceId: string): Candidate 
           : { url: location.repo, directory: location.directory },
       }),
     ...(entry.category === undefined ? {} : { category: entry.category }),
-    keywords: ['dsh', 'dsh-plugin', 'deepseek-harness'],
-    labels: [],
+    keywords: keywordsFor(IDENTITY_KEYWORDS, entry.category, entry.capabilities ?? [], entry.keywords ?? []),
+    labels: [...labelsFor(entry.capabilities ?? [], entry.redLines ?? []), ...popularityLabels(entry.stars, entry.downloads)],
     sortKeys: sortKeys(entry),
     versions: [
       {
@@ -141,4 +166,144 @@ export function withRegistryTimes(
     return { ...version, publishTimestamp: seconds }
   })
   return { ...candidate, versions }
+}
+
+/**
+ * The registry this project reads by default.
+ *
+ * The public registry, because the catalog's entries are public packages: the
+ * `npm {}` registry field of a version only has to be recorded when it differs
+ * from this one. Pointing it elsewhere is a configuration change, which is why
+ * `runPipeline` takes it as an option.
+ */
+export const DEFAULT_REGISTRY = 'https://registry.npmjs.org/'
+
+/**
+ * The registry document URL for one package.
+ *
+ * A scoped name's `/` must be encoded but its `@` must not: the registry routes
+ * `@scope%2Fname` and rejects `%40scope%2Fname` outright, which is the subtle
+ * half of this otherwise boring function.
+ *
+ * @param registry - registry base URL, with or without a trailing slash.
+ * @param name - exact npm package name.
+ * @returns the absolute packument URL.
+ */
+export function packumentUrl(registry: string, name: string): string {
+  const base = registry.endsWith('/') ? registry : `${registry}/`
+  const encoded = name.startsWith('@')
+    ? `@${encodeURIComponent(name.slice(1))}`
+    : encodeURIComponent(name)
+  return `${base}${encoded}`
+}
+
+/** The slice of a packument this module reads. */
+interface Packument {
+  readonly versions?: unknown
+  readonly time?: unknown
+  readonly 'dist-tags'?: unknown
+}
+
+/**
+ * Every installable version of one npm package, newest first.
+ *
+ * Upstream's `plugins.json` names exactly one version per entry — the one its
+ * own submitter picked — so a market built from it alone offers no version
+ * history. That costs more than it looks: DSH's plugin page lists every version
+ * it can install, refuses versions the running DSH does not satisfy through
+ * `engines.dsh`, and falls back to a prerelease only when no plain version is
+ * compatible. All three need more than one version to mean anything.
+ *
+ * The registry document carries the versions together with the two facts needed
+ * to judge each: whether the version declares `dsh.bundle` at all (a version
+ * without one is not installable and is skipped), and its publish time.
+ *
+ * Ordering is left to the caller's sort rather than fixed here: the validator
+ * sorts each plugin's versions by descending SemVer precedence anyway, so this
+ * returns them in document order and lets that rule own the guarantee.
+ *
+ * @param packument - the registry document for the package.
+ * @param declaresBundle - whether a manifest declares `dsh.bundle`. Injected
+ *   rather than imported because the check lives in `git.ts`, which already
+ *   imports this module; importing it back would make the two cyclic.
+ * @returns the installable versions, or an empty array when none qualify.
+ */
+export function versionsFromPackument(
+  packument: unknown,
+  declaresBundle: (manifest: unknown) => boolean,
+): ResolvedVersion[] {
+  if (typeof packument !== 'object' || packument === null || Array.isArray(packument)) return []
+  const document = packument as Packument
+  if (typeof document.versions !== 'object' || document.versions === null) return []
+  const times = typeof document.time === 'object' && document.time !== null
+    ? document.time as Record<string, unknown>
+    : {}
+
+  const out: ResolvedVersion[] = []
+  for (const [version, manifest] of Object.entries(document.versions as Record<string, unknown>)) {
+    // The version must be exact SemVer and carry a bundle declaration; anything
+    // else is not a thing `dsh plugin add` can install, and format 1 would
+    // reject the whole document over one bad entry.
+    if (versionProblem(version) !== undefined) continue
+    if (typeof manifest !== 'object' || manifest === null) continue
+    const record = manifest as Record<string, unknown>
+    if (!declaresBundle(manifest)) continue
+    // A deprecated version still installs, but the maintainer has said it
+    // should not be chosen; listing it in the version menu suggests otherwise.
+    if (record['deprecated'] !== undefined) continue
+
+    const published = times[version]
+    const seconds = typeof published === 'string' ? Math.floor(Date.parse(published) / 1000) : Number.NaN
+    if (Number.isNaN(seconds) || seconds < 0 || seconds >= MAX_PUBLISH_TIMESTAMP) continue
+
+    const range = declaredDshRange(record)
+    out.push({
+      version,
+      publishTimestamp: seconds,
+      source: { type: 'npm' },
+      ...(range === undefined ? {} : { dshRange: range }),
+    })
+  }
+  return out
+}
+
+/** `engines.dsh` from a raw manifest record, when it is a usable range. */
+function declaredDshRange(manifest: Readonly<Record<string, unknown>>): string | undefined {
+  const engines = manifest['engines']
+  if (typeof engines !== 'object' || engines === null || Array.isArray(engines)) return undefined
+  const range = (engines as Record<string, unknown>)['dsh']
+  if (typeof range !== 'string' || range.trim() === '') return undefined
+  return dshRangeProblem(range) === undefined ? range.trim() : undefined
+}
+
+/**
+ * Replace a candidate's single upstream version with the registry's full list.
+ *
+ * The upstream version is kept when the registry has nothing usable: an entry
+ * whose package is unpublished, renamed, or temporarily unreachable is still a
+ * real plugin, and dropping it would turn a registry hiccup into a missing
+ * market entry. It is also kept when the registry document does not mention it,
+ * because upstream may legitimately pin a version the registry no longer serves
+ * and silently replacing it would change what the market installs.
+ *
+ * @param candidate - an npm candidate carrying one upstream version.
+ * @param packument - the registry document, or `undefined` when unavailable.
+ * @returns the candidate with every installable version, newest first.
+ */
+export function withPackument(
+  candidate: Candidate,
+  packument: unknown,
+  declaresBundle: (manifest: unknown) => boolean,
+): Candidate {
+  const versions = versionsFromPackument(packument, declaresBundle)
+  if (versions.length === 0) return candidate
+  const upstream = candidate.versions[0]
+  const complete = upstream !== undefined && !versions.some((version) => version.version === upstream.version)
+    ? [...versions, upstream]
+    : versions
+  // Newest first, so the document reads the way the version menu shows it.
+  // `semver.rcompare` is total over exact versions; a version it cannot parse
+  // keeps its position rather than being dropped here — validation owns that.
+  const sorted = [...complete].sort((left, right) => semver.rcompare(left.version, right.version))
+  return { ...candidate, versions: sorted }
 }
