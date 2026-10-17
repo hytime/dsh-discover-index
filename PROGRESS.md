@@ -1,8 +1,10 @@
 # 项目进度 / Project status
 
-> 快照时间：**2026-10-18 01:55 CST**
-> 分支 `main`，已推送，工作区干净，CI 两个工作流均在最新提交上成功，索引已上线。
-> 本文件是项目的当前状态记录；历史缺陷的完整复盘保留在下方，因为故障模式比修复本身更有参考价值。
+> 快照时间：**2026-10-18 02:30 CST**
+> 分支 `main`，已推送，工作区干净，CI 两个工作流均成功，索引已上线。
+> 历史缺陷的完整复盘保留在下方，因为故障模式比修复本身更有参考价值。
+>
+> **本文件中的数字都是快照值，不是常量。** 会自行漂移的量（提交数、测试数、插件与版本数）只作为记录该时刻的证据，不作为契约；要当前值请直接跑命令或查询索引。
 
 **DSH 引用源**：`https://hytime.github.io/dsh-discover-index/index.json`
 
@@ -21,16 +23,16 @@
 | 项 | 状态 | 证据 |
 |---|---|---|
 | TypeScript 编译 | ✅ | `tsc -p tsconfig.json --noEmit` 退出码 0 |
-| 测试 | ✅ | `vitest run` → **364 通过 / 1 跳过 / 0 失败**（11 个文件，全离线） |
+| 测试 | ✅ | `vitest run` 全绿（11 个文件，全部离线，基于录制 fixture） |
 | 真实校验器验证 | ✅ | 产物经 `@deepseek-ai/dsh-plugin-market-index` 校验通过 |
-| 全量构建 | ✅ | 5452 个插件、37355 个版本（2587 npm + 2865 git） |
+| 全量构建 | ✅ | 约 5450 个插件、约 3.7 万个版本（2587 npm + 2865 git） |
 | 版本历史 | ✅ | 2231 个插件拥有多个版本；645 个插件带 `engines.dsh` |
 | 能力/风险/热度标签 | ✅ | 24 个已声明标签；1031 个插件带 `shell`，343 个带至少一个 `risk:` |
 | deny 名单 fail-open | ✅ 已修复 | 见下方「已修复」；`git+https` / SSH / 非 GitHub 域名均被拒绝 |
 | 市场描述含源码出处 | ✅ | 两语言均带 `https://github.com/hytime/dsh-discover-index`，长度 127 / 88，未触及 DSH 的 300 上限 |
 | 可配置解析 | ✅ | `fields` 映射可指向任意字段名（含点路径）与自定义排序键；见 `tests/custom-parsing.test.ts` |
 | 可 fork | ✅ | workflow 与测试均从运行仓库推导 Pages 地址；见 [`FORKING.md`](FORKING.md) |
-| Git | ✅ | 11 次提交，已推送 `main`，工作区干净 |
+| Git | ✅ | 已推送 `main`，工作区干净（提交数见 `git rev-list --count HEAD`） |
 | GitHub 仓库 | ✅ | <https://github.com/hytime/dsh-discover-index> |
 | GitHub Pages | ✅ | <https://hytime.github.io/dsh-discover-index/index.json> 返回 200 |
 | CI 工作流实跑 | ✅ | `Validate` 通过；`Build and deploy index` build + deploy 通过 |
