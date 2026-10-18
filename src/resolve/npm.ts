@@ -292,6 +292,73 @@ function declaredDshRange(manifest: Readonly<Record<string, unknown>>): string |
 }
 
 /**
+ * How many versions one plugin keeps.
+ *
+ * A busy package publishes hundreds of releases, and none of the extra ones add
+ * a choice a user can meaningfully make — they add menu rows. The measured case
+ * is `billion-context` with 3,781 versions, whose menu is unusable and which
+ * alone accounted for a tenth of the whole document.
+ */
+export const MAX_VERSIONS_PER_PLUGIN = 5
+
+/**
+ * Keep the most recent versions, plus the ones a user still needs.
+ *
+ * "Most recent" is by publish time, not by SemVer precedence, because a version
+ * published yesterday is what someone tracking releases wants whether it is a
+ * patch or a rewrite. Truncating by time alone is wrong in two measurable ways,
+ * though, so two versions are always kept on top of the recent window:
+ *
+ *   - **The highest stable version.** DSH prefers a stable version and only
+ *     falls back to a prerelease when a plugin lists no stable one at all
+ *     (`defaultVersion` in plugin-market). A package that released
+ *     `0.1.0` once and has shipped only prereleases since would, after a naive
+ *     truncation, offer nothing but prereleases — turning a choice the upstream
+ *     actually gives into one it does not.
+ *   - **The highest overall version.** It is the version the plugin page shows
+ *     first and what "update available" compares against.
+ *
+ * The result is at most `MAX_VERSIONS_PER_PLUGIN + 2` versions, ordered newest
+ * first. A list already within the limit is returned unchanged, so the common
+ * case pays nothing.
+ *
+ * @param versions - installable versions, in any order.
+ * @param limit - how many recent versions to keep.
+ * @returns the kept versions, newest first.
+ */
+export function capVersions(
+  versions: readonly ResolvedVersion[],
+  limit: number = MAX_VERSIONS_PER_PLUGIN,
+): ResolvedVersion[] {
+  // `semver.rcompare` throws on a version it cannot parse, and this module is a
+  // library boundary: the resolver filters before calling, but an exported
+  // function may be handed anything. An unparseable version is kept in place and
+  // ordered last rather than allowed to abort the whole build.
+  const compare = (left: ResolvedVersion, right: ResolvedVersion): number => {
+    const [a, b] = [semver.valid(left.version), semver.valid(right.version)]
+    if (a === null || b === null) return a === b ? 0 : a === null ? 1 : -1
+    return semver.rcompare(a, b)
+  }
+  const ordered = [...versions].sort(compare)
+
+  if (ordered.length <= limit) return ordered
+
+  const byTime = [...versions].sort((left, right) => right.publishTimestamp - left.publishTimestamp)
+  const kept = new Map<string, ResolvedVersion>()
+  for (const version of byTime.slice(0, limit)) kept.set(version.version, version)
+
+  const highest = ordered[0]
+  if (highest !== undefined) kept.set(highest.version, highest)
+  const highestStable = ordered.find((version) => {
+    const parsed = semver.valid(version.version)
+    return parsed !== null && semver.prerelease(parsed) === null
+  })
+  if (highestStable !== undefined) kept.set(highestStable.version, highestStable)
+
+  return [...kept.values()].sort(compare)
+}
+
+/**
  * Replace a candidate's single upstream version with the registry's full list.
  *
  * The upstream version is kept when the registry has nothing usable: an entry
@@ -316,9 +383,7 @@ export function withPackument(
   const complete = upstream !== undefined && !versions.some((version) => version.version === upstream.version)
     ? [...versions, upstream]
     : versions
-  // Newest first, so the document reads the way the version menu shows it.
-  // `semver.rcompare` is total over exact versions; a version it cannot parse
-  // keeps its position rather than being dropped here — validation owns that.
-  const sorted = [...complete].sort((left, right) => semver.rcompare(left.version, right.version))
-  return { ...candidate, versions: sorted }
+  // `capVersions` both orders (newest first, the way the menu reads) and
+  // truncates, so callers get one consistent list regardless of entry point.
+  return { ...candidate, versions: capVersions(complete) }
 }

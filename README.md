@@ -108,8 +108,24 @@ reported upstream; a bad *conversion* of a good entry belongs here.
 Upstream names exactly one version per entry. DSH's plugin page lists every version it can
 install and refuses those the running DSH does not satisfy through `engines.dsh` — neither
 of which means anything with a single version per plugin. The build therefore reads each
-npm package's registry document and lists every version that declares `dsh.bundle`, is not
-deprecated, and has a publish time (2,607 documents, roughly 150 MB on a cold run).
+npm package's registry document and lists the versions that declare `dsh.bundle`, are not
+deprecated, and have a publish time (2,607 documents, roughly 150 MB on a cold run).
+
+**At most five versions per plugin.** A busy package publishes hundreds of releases, and
+they add menu rows rather than choices — `billion-context` alone had 3,781, which was a
+tenth of the entire document and a version list nobody can use. The cap keeps the five
+most recently published versions, **plus** two that are never dropped:
+
+- **the highest stable version**, because DSH prefers a stable release and only falls back
+  to a prerelease when a plugin lists no stable one at all. Measured against the live
+  catalog, capping by publish time alone would have stripped the only stable version from
+  11 packages, leaving them installable only as prereleases;
+- **the highest version overall**, which the plugin page shows first and which "update
+  available" compares against.
+
+So a plugin lists at most seven versions, ordered newest first. The cap removes about
+two thirds of the version entries and about a quarter of the document size — stated as
+proportions rather than figures, because both move as the catalog grows.
 
 Git-resolved plugins still list the one version their pinned commit declares. A registry
 that cannot be reached is not fatal: the plugin keeps its upstream version, because losing

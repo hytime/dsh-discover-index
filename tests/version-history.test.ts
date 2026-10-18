@@ -18,6 +18,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
+import semver from 'semver'
 import { parseMarketIndex } from '@deepseek-ai/dsh-plugin-market-index'
 import {
   TEST_INDEX_URL,
@@ -133,13 +134,15 @@ describe.skipIf(skipIfMissing(npmModule))('withPackument: keeping what upstream 
     return npm.npmCandidate(entry(overrides), 'a-source')
   }
 
-  it('replaces the single upstream version with the full history, newest first', () => {
+  it('replaces the single upstream version with the recent history, newest first', () => {
+    // The recorded document holds ten versions; the cap keeps the newest five,
+    // so this asserts the newest are present and the order, not the full set.
     const before = candidateFor()
     expect(before.versions).toHaveLength(1)
     const after = npm.withPackument(before, packument('dsh-engram'), declaresBundle)
     expect(after.versions.length).toBeGreaterThan(1)
     expect(after.versions[0].version).toBe('0.5.0')
-    expect(after.versions.at(-1).version).toBe('0.2.0')
+    expect(after.versions.map((entry: any) => entry.version)).toContain('0.4.0')
   })
 
   it('keeps the upstream version when the registry does not list it', () => {
@@ -300,5 +303,138 @@ describe.skipIf(skipIfMissing(renderModule))('renderIndex: labels are declared a
   it('declares no label when no plugin carries one', () => {
     const doc = render.renderIndex([candidate([])], profile) as any
     expect(doc.metadata.labels).toEqual({})
+  })
+})
+
+/**
+ * Version capping.
+ *
+ * A busy package publishes hundreds of releases, and `billion-context` had
+ * 3,781 of them — a version menu nobody can use, and roughly a tenth of the
+ * whole document. Capping fixes that, but a naive cap silently removes choices:
+ * measured against the live catalog, truncating purely by publish time strips
+ * every stable version from 11 packages, which makes DSH offer prereleases
+ * where upstream offers a stable release.
+ */
+describe.skipIf(skipIfMissing(npmModule))('capVersions: keep the recent, never drop a real choice', () => {
+  const npm = lazySrc(npmModule, 'resolve/npm.ts')
+
+  function version(version: string, publishTimestamp: number) {
+    return { version, publishTimestamp, source: { type: 'npm' as const } }
+  }
+
+  it('keeps the newest by publish time, newest first', () => {
+    const input = Array.from({ length: 20 }, (_, index) => version(`${index + 1}.0.0`, 1000 + index))
+    const kept = npm.capVersions(input)
+    expect(kept).toHaveLength(npm.MAX_VERSIONS_PER_PLUGIN)
+    // Newest publish time wins, and the list reads newest-version-first.
+    expect(kept.map((entry: any) => entry.version)).toEqual([
+      '20.0.0', '19.0.0', '18.0.0', '17.0.0', '16.0.0',
+    ])
+  })
+
+  it('returns a short list unchanged', () => {
+    const input = [version('1.0.0', 1), version('2.0.0', 2)]
+    expect(npm.capVersions(input).map((entry: any) => entry.version)).toEqual(['2.0.0', '1.0.0'])
+  })
+
+  it('keeps the one stable version even when it is the oldest', () => {
+    // The recorded shape of @ai-eks/dsh-docking-layout: six versions, the only
+    // stable one published first. DSH prefers a stable version when one exists,
+    // so dropping this leaves the plugin installable only as a prerelease.
+    const input = [
+      version('0.2.0-rc.2', 1791417600),
+      version('0.1.7-rc.1', 1790000000),
+      version('0.1.5-rc.1', 1788800000),
+      version('0.1.2-rc.1', 1788500000),
+      version('0.1.1-rc.2', 1787500000),
+      version('0.1.0', 1787490000),
+    ]
+    const kept = npm.capVersions(input).map((entry: any) => entry.version)
+    expect(kept).toContain('0.1.0')
+    expect(kept).toHaveLength(npm.MAX_VERSIONS_PER_PLUGIN + 1)
+  })
+
+  it('keeps the highest version even when it is not among the newest', () => {
+    // A backported fix published after a major bump: the major is older by
+    // publish time but is what the plugin page shows and what an update compares
+    // against.
+    const input = [
+      version('2.0.0', 1000),
+      ...Array.from({ length: 8 }, (_, index) => version(`1.9.${index}`, 2000 + index)),
+    ]
+    const kept = npm.capVersions(input).map((entry: any) => entry.version)
+    expect(kept).toContain('2.0.0')
+  })
+
+  it('never returns more than the limit plus the two guaranteed versions', () => {
+    const input = Array.from({ length: 200 }, (_, index) => version(`${index + 1}.0.0`, 1000 + index))
+    expect(npm.capVersions(input).length).toBeLessThanOrEqual(npm.MAX_VERSIONS_PER_PLUGIN + 2)
+  })
+
+  it('orders the result by descending SemVer precedence', () => {
+    const input = Array.from({ length: 12 }, (_, index) => version(`1.${index}.0`, 1000 + index))
+    const kept = npm.capVersions(input).map((entry: any) => entry.version)
+    // Newest publish times are 1.11.0 … 1.7.0; descending precedence puts the
+    // highest minor first. Asserted literally so a comparator change is visible.
+    expect(kept).toEqual(['1.11.0', '1.10.0', '1.9.0', '1.8.0', '1.7.0'])
+  })
+
+  it('tolerates a version it cannot parse instead of throwing', () => {
+    // `semver.rcompare` throws on an unparseable version, and this is an
+    // exported function: one bad entry must not abort the build.
+    const kept = npm.capVersions([version('not-a-version', 5), version('1.0.0', 1)])
+    expect(kept.map((entry: any) => entry.version)).toEqual(['1.0.0', 'not-a-version'])
+  })
+
+  it('never drops the highest version or the highest stable one, on any input', () => {
+    // Property test rather than a case list: these two are what DSH's default
+    // version and "update available" both depend on, and a future change to the
+    // selection heuristic should not be able to lose them quietly.
+    const cases: { label: string; input: { version: string; publishTimestamp: number; source: { type: 'npm' } }[] }[] = [
+      {
+        label: 'only stable version is the oldest',
+        input: [
+          version('0.2.0-rc.2', 100), version('0.1.7-rc.1', 99), version('0.1.5-rc.1', 98),
+          version('0.1.2-rc.1', 97), version('0.1.1-rc.2', 96), version('0.1.0', 95),
+        ],
+      },
+      {
+        label: 'major published before many patches',
+        input: [
+          version('2.0.0', 10),
+          ...Array.from({ length: 9 }, (_, index) => version(`1.9.${index}`, 100 + index)),
+        ],
+      },
+      {
+        label: 'all prereleases',
+        input: Array.from({ length: 40 }, (_, index) => version(`0.1.0-rc.${40 - index}`, 1000 + index)),
+      },
+      {
+        label: 'exactly at the limit',
+        input: Array.from({ length: npm.MAX_VERSIONS_PER_PLUGIN }, (_, index) => version(`${index + 1}.0.0`, 100 + index)),
+      },
+      {
+        label: 'one over the limit',
+        input: Array.from({ length: npm.MAX_VERSIONS_PER_PLUGIN + 1 }, (_, index) => version(`${index + 1}.0.0`, 100 + index)),
+      },
+    ]
+
+    for (const { label, input } of cases) {
+      const kept: string[] = npm.capVersions(input).map((entry: any) => entry.version)
+      const byPrecedence = [...input].sort((a, b) => semver.rcompare(a.version, b.version))
+      expect(kept, `${label}: highest version`).toContain(byPrecedence[0]!.version)
+      const highestStable = byPrecedence.find((entry) => semver.prerelease(entry.version) === null)
+      if (highestStable !== undefined) {
+        expect(kept, `${label}: highest stable`).toContain(highestStable.version)
+      }
+    }
+  })
+
+  it('applies the cap through withPackument, so every caller gets it', () => {
+    const { declaresBundle } = lazySrc(gitModule, 'resolve/git.ts')
+    const before = npm.npmCandidate(entry(), 'a-source')
+    const after = npm.withPackument(before, packument('dsh-engram'), declaresBundle)
+    expect(after.versions.length).toBeLessThanOrEqual(npm.MAX_VERSIONS_PER_PLUGIN + 2)
   })
 })
