@@ -76,8 +76,15 @@ measured, and how much of it is trustworthy. It shows:
   known for one subset of plugins and DSH ranges for a different one, and dividing both by
   the same total would invent a fact nobody measured.
 - **Distributions** — versions per plugin, plugins per category, plugins per label.
-- **Who references this project** — repositories whose public files name it, found by
-  GitHub code search.
+- **Who uses this index** — repositories that mention or consume it, graded by evidence:
+  *reads the JSON* (the published index URL appears there), *mentions only* (just the name
+  appears), or a fork, which can publish a copy of its own. The tiers are never summed into
+  one number, because a curated list linking to this repository does not consume the market.
+
+  Two honest limits are stated on the page rather than left implied. GitHub Pages keeps no
+  access log, so how many clients actually loaded the index is recorded nowhere — usage
+  leaves no public trace. And GitHub's code search does not index every repository or every
+  recent change, so the reference figures are floors, not totals.
 
 Everything is computed at build time from the document that was just validated, so the page
 cannot describe a market that differs from the published one, and the numbers are in the
