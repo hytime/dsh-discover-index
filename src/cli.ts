@@ -17,9 +17,39 @@ import { ConfigError, loadConfig, DEFAULT_CONFIG_PATH } from './config.js'
 import { runPipeline, type RunResult, type ResolvedGitEntry } from './pipeline.js'
 import { HttpClient } from './util/http.js'
 import { catalogUrl } from './sources/upstream-catalog.js'
+import { computeStatistics } from './report/statistics.js'
+import { renderStatisticsPage } from './report/page.js'
+import { findReferences, type ReferenceReport } from './report/references.js'
 
-/** Where build output lands. Ignored by git; published as a CI artifact. */
+/**
+ * Where compiled output lands. Ignored by git; never published.
+ *
+ * Kept separate from {@link SITE}: the Pages workflow uploads a directory, and
+ * uploading this one would serve the project's own TypeScript output as web
+ * content — which it did, until the artifact was narrowed.
+ */
 const DIST = 'dist'
+
+/** Where the published site is assembled: the indexes and the statistics page. */
+const SITE = path.join('dist', 'site')
+
+/**
+ * Where this build will be served from, and where its source lives.
+ *
+ * CI always provides `GITHUB_REPOSITORY`, so a fork's page links to the fork
+ * without editing anything. A local run has no such origin, so it falls back to
+ * this project's own — the alternative would be emitting `localhost` links into
+ * a page that is about to be published.
+ */
+function buildOrigins(): { readonly site: string; readonly repository: string } {
+  const slug = process.env['GITHUB_REPOSITORY']
+  const valid = slug !== undefined && /^[^/]+\/[^/]+$/u.test(slug)
+  const [owner, name] = valid ? (slug as string).split('/') : ['hytime', 'dsh-discover-index']
+  return {
+    site: `https://${owner as string}.github.io/${name as string}`,
+    repository: `https://github.com/${owner as string}/${name as string}`,
+  }
+}
 
 /** The Git-resolution cache, so a daily run re-fetches only what changed. */
 const CACHE_FILE = path.join('data', 'resolve-cache.json')
@@ -48,10 +78,13 @@ function usage(): void {
   process.stdout.write(
     `dsh-discover-index — convert plugin catalogs into a DSH Discover index\n`
     + `\n`
-    + `  build [--profile <id>] [--config <path>] [--limit <n>] [--cache-ttl-days <n>] [--no-cache]\n`
+    + `  build [--profile <id>] [--config <path>] [--limit <n>] [--cache-ttl-days <n>] [--no-cache] [--no-references]\n`
     + `      Fetch every enabled source, convert to plugin market index format 1,\n`
-    + `      validate each document, and write it to ${DIST}/<profile>.json.\n`
+    + `      validate each document, and write it to ${SITE}/<profile>.json\n`
+    + `      together with a statistics page.\n`
     + `      --cache-ttl-days re-resolves git entries older than N days (default 7).\n`
+    + `      --no-references skips the code-search sweep that counts who references\n`
+    + `      this project; without a token that sweep is rate limited anyway.\n`
     + `\n`
     + `  doctor [--config <path>] [--limit <n>]\n`
     + `      The same read and conversion, but report every rejection and write\n`
@@ -146,14 +179,55 @@ async function commandBuild(args: Map<string, string | true>): Promise<number> {
     log,
   })
 
-  fs.mkdirSync(DIST, { recursive: true })
+  // Who references this project. Two properties matter: it must never fail the
+  // build (the index is the product, this is a nice-to-have), and it must be
+  // distinguishable from "measured zero". Hence `undefined` on failure rather
+  // than an empty report, which the page renders as "not measured".
+  let references: ReferenceReport | undefined
+  if (args.get('no-references') !== true) {
+    const origins = buildOrigins()
+    try {
+      references = await findReferences({
+        indexUrl: `${origins.site}/${result.outputs[0]?.profile.output ?? 'index.json'}`,
+        self: origins.repository.replace('https://github.com/', ''),
+        token: process.env['GITHUB_TOKEN'],
+      })
+      process.stdout.write(
+        `\nreferences: ${String(references.references.length)} repositories`
+        + `${references.incomplete ? ' (incomplete sweep)' : ''}\n`,
+      )
+    } catch (error) {
+      process.stdout.write(`\nreferences: sweep failed (${error instanceof Error ? error.message : String(error)})\n`)
+    }
+  }
+
+  fs.mkdirSync(SITE, { recursive: true })
+  const pages = new Map<string, string>()
   for (const output of result.outputs) {
-    const target = path.join(DIST, output.profile.output)
+    const target = path.join(SITE, output.profile.output)
     fs.writeFileSync(target, `${JSON.stringify(output.document, null, 2)}\n`)
     process.stdout.write(
       `\nwrote ${target}: ${String(output.validated.plugins.length)} plugins, `
       + `${String(Math.round(output.starCoverage * 100))}% with a star count\n`,
     )
+    // One page per profile, derived from the document that was just written, so
+    // the page cannot describe a market that is not published. The default
+    // profile owns `stats.html`; further profiles get `<output>-stats.html`.
+    const pageName = pages.size === 0 ? 'stats.html' : `${path.parse(output.profile.output).name}-stats.html`
+    const origins = buildOrigins()
+    pages.set(pageName, renderStatisticsPage(computeStatistics(output.document as never), {
+      title: output.profile.title,
+      indexUrl: `${origins.site}/${output.profile.output}`,
+      siteUrl: origins.site,
+      generatedAt: new Date().toISOString(),
+      repositoryUrl: origins.repository,
+      references,
+    }))
+  }
+  for (const [name, html] of pages) {
+    const target = path.join(SITE, name)
+    fs.writeFileSync(target, html)
+    process.stdout.write(`wrote ${target}: ${String(html.length)} bytes of statistics\n`)
   }
 
   if (useCache) writeCache(cache)
@@ -211,7 +285,7 @@ async function commandSources(args: Map<string, string | true>): Promise<number>
   process.stdout.write('\nprofiles:\n')
   for (const profile of config.profiles) {
     process.stdout.write(
-      `  ${profile.id} -> ${DIST}/${profile.output}  sources=${profile.sources.join(',')} minStars=${String(profile.minStars)}\n`,
+      `  ${profile.id} -> ${SITE}/${profile.output}  sources=${profile.sources.join(',')} minStars=${String(profile.minStars)}\n`,
     )
   }
   return 0

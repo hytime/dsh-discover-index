@@ -51,7 +51,7 @@ node dist/cli.js build
   → 2607 份 registry 文档用于版本历史（约 150 MB、冷启动约 7 分钟）
   → 约 5600 个候选 → 约 5500 个插件
   → 请求数与 star 覆盖率随上游变化，不作为契约
-  → dist/index.json ≈ 9.5 MB（gzip ≈ 1.9 MB）
+  → dist/site/index.json ≈ 9.5 MB（gzip ≈ 1.9 MB）
 ```
 
 版本上限的形态：理论上「最近 5 个 ＋ 最高版 ＋ 最高稳定版」，最多 7 个；实测最大 6 个（两个保留项都落在最近 5 个里的情况才会出现 7）。相比不设上限，版本条目减少约三分之二、文档体积减少约四分之一。不设上限时 `billion-context` 单包 3781 个版本，占整份文档的十分之一。
@@ -180,7 +180,7 @@ pnpm install
 pnpm run build
 node dist/cli.js sources   # 检查源可达性
 node dist/cli.js doctor    # 报告每条被拒理由，不写文件
-node dist/cli.js build     # 生成 dist/index.json
+node dist/cli.js build     # 生成 dist/site/index.json
 pnpm test
 ```
 

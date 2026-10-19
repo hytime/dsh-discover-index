@@ -103,7 +103,7 @@ https://<你的账号>.github.io/<你的仓库>/index.json
 不用任何工具就能确认它是否有效——workflow 做的就是同一件事：
 
 ```bash
-GITHUB_REPOSITORY=<you>/<your-repo> node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [o,r]=process.env.GITHUB_REPOSITORY.split('/');const doc=JSON.parse(fs.readFileSync('dist/index.json','utf8'));const v=m.parseMarketIndex(doc,'https://'+o+'.github.io/'+r+'/index.json');console.log('valid, plugins='+v.plugins.length)})"
+GITHUB_REPOSITORY=<you>/<your-repo> node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [o,r]=process.env.GITHUB_REPOSITORY.split('/');const doc=JSON.parse(fs.readFileSync('dist/site/index.json','utf8'));const v=m.parseMarketIndex(doc,'https://'+o+'.github.io/'+r+'/index.json');console.log('valid, plugins='+v.plugins.length)})"
 ```
 
 ## 5. 添加进 DSH

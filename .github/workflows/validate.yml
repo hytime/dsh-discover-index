@@ -60,6 +60,10 @@ jobs:
       # couple of times so a transient third-party outage does not read as a
       # broken pull request; a persistent failure still fails the gate.
       - name: Build the index from the live upstream catalog
+        env:
+          # Raises the GitHub API rate limit for git resolution, and lets the
+          # statistics page's code-search sweep run instead of being throttled.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           for attempt in 1 2 3; do
@@ -72,9 +76,9 @@ jobs:
           echo "index build failed after 3 attempts" >&2
           exit 1
 
-      - name: Validate dist/index.json with the real validator
+      - name: Validate dist/site/index.json with the real validator
         run: |
-          node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');const origin = 'https://' + owner + '.github.io/' + repo;const doc=JSON.parse(fs.readFileSync('dist/index.json','utf8'));const v=m.parseMarketIndex(doc, origin + '/index.json');console.log('valid, plugins='+v.plugins.length)})"
+          node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');const origin = 'https://' + owner + '.github.io/' + repo;const doc=JSON.parse(fs.readFileSync('dist/site/index.json','utf8'));const v=m.parseMarketIndex(doc, origin + '/index.json');console.log('valid, plugins='+v.plugins.length)})"
 
       # Additional profile outputs (configured in config/config.yml) are
       # validated generically, so renaming or adding a profile needs no change
@@ -83,8 +87,8 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          for file in dist/*.json; do
-            if [ "$file" = "dist/index.json" ]; then
+          for file in dist/site/*.json; do
+            if [ "$file" = "dist/site/index.json" ]; then
               continue
             fi
             node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');const origin = 'https://' + owner + '.github.io/' + repo;const f=process.argv[1];const doc=JSON.parse(fs.readFileSync(f,'utf8'));const v=m.parseMarketIndex(doc, origin+'/'+f.split('/').pop());console.log('valid '+f+', plugins='+v.plugins.length)})" "$file"
@@ -96,12 +100,27 @@ jobs:
         run: |
           node -e "
             const fs = require('fs');
-            const doc = JSON.parse(fs.readFileSync('dist/index.json', 'utf8'));
+            const doc = JSON.parse(fs.readFileSync('dist/site/index.json', 'utf8'));
             const count = Array.isArray(doc.plugins) ? doc.plugins.length : 0;
             const floor = 2000;
             if (count < floor) {
-              console.error('FAIL: dist/index.json holds ' + count + ' plugins, below the floor of ' + floor);
+              console.error('FAIL: dist/site/index.json holds ' + count + ' plugins, below the floor of ' + floor);
               process.exit(1);
             }
             console.log('Plugin count ok: ' + count + ' >= ' + floor);
+          "
+
+      # The statistics page is generated beside the index; a build that produced
+      # one without the other would deploy a site with a dead link, so the pull
+      # request gate checks the same thing the publish workflow does.
+      - name: Check the statistics page
+        run: |
+          node -e "
+            const fs = require('fs');
+            const html = fs.readFileSync('dist/site/stats.html', 'utf8');
+            if (html.length < 5000) { console.error('FAIL: stats.html is only ' + html.length + ' bytes'); process.exit(1); }
+            const doc = JSON.parse(fs.readFileSync('dist/site/index.json', 'utf8'));
+            const expected = doc.plugins.length.toLocaleString('en-US');
+            if (!html.includes(expected)) { console.error('FAIL: stats.html does not mention the plugin count ' + expected); process.exit(1); }
+            console.log('stats page ok: ' + html.length + ' bytes, mentions ' + expected + ' plugins');
           "

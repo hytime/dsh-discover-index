@@ -122,7 +122,7 @@ https://<your-account>.github.io/<your-repo>/index.json
 You can confirm it is valid without any tooling — the workflow already did exactly this:
 
 ```bash
-GITHUB_REPOSITORY=<you>/<your-repo> node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [o,r]=process.env.GITHUB_REPOSITORY.split('/');const doc=JSON.parse(fs.readFileSync('dist/index.json','utf8'));const v=m.parseMarketIndex(doc,'https://'+o+'.github.io/'+r+'/index.json');console.log('valid, plugins='+v.plugins.length)})"
+GITHUB_REPOSITORY=<you>/<your-repo> node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [o,r]=process.env.GITHUB_REPOSITORY.split('/');const doc=JSON.parse(fs.readFileSync('dist/site/index.json','utf8'));const v=m.parseMarketIndex(doc,'https://'+o+'.github.io/'+r+'/index.json');console.log('valid, plugins='+v.plugins.length)})"
 ```
 
 ## 5. Add it to DSH

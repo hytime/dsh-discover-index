@@ -35,7 +35,23 @@
 
 ## 产出
 
-`dist/index.json`——一份格式 1 文档，发布于 <https://hytime.github.io/dsh-discover-index/index.json>。`config/config.yml` 中声明的每个 **profile** 各自产出一份文档（例如按星标下限筛选的子集可以单独发布为一个市场），每一份都会在 CI 中独立校验。
+`dist/site/index.json`——一份格式 1 文档，发布于 <https://hytime.github.io/dsh-discover-index/index.json>。`config/config.yml` 中声明的每个 **profile** 各自产出一份文档（例如按星标下限筛选的子集可以单独发布为一个市场），每一份都会在 CI 中独立校验。
+
+旁边还有 **`stats.html`**——由同一份文档生成的统计页。
+
+> `dist/site/` 才是发布的目录；`dist/` 还放着编译后的 JavaScript，它不发布。Pages artifact 只取 `dist/site/`，因此构建产物不会作为网页内容被公开。
+
+### 统计页展示了什么
+
+<https://hytime.github.io/dsh-discover-index/stats.html>
+
+市场索引回答「有哪些插件」；统计页回答的是另一个问题——一个访客在决定要不要加这个市场时真正关心的：这里面有多少是**被测量过的**，多少是**可信的**。页面给出：
+
+- **覆盖率**，每一项都对应各自的分母——有多少条目带星标数、下载量、版本历史、`engines.dsh` 范围、分类、标签，或风险标记。这里给单一的「覆盖率 %」会是在编造数字：星标覆盖的是某一部分插件，DSH 范围覆盖的是另一部分，用同一个总数去除两者，等于凭空造出一个没人测量过的事实。
+- **分布**——每个插件的版本数、各分类的插件数、各标签的插件数。
+- **谁引用了本项目**——公开文件中提到本项目的仓库，由 GitHub 代码搜索得出。
+
+所有数字都在构建时由「刚刚通过校验的那份文档」算出，因此统计页不可能描述一个与已发布市场不一致的市场；数字直接写在 HTML 里，而不是靠脚本生成。页面**不加载任何第三方脚本**，引用的远端域名只有本项目自己的。
 
 ### 市场声明了什么
 
@@ -322,7 +338,7 @@ profiles:
 ```bash
 pnpm install                 # 与 CI 完全一致地安装依赖
 pnpm run build               # 编译 TypeScript 到 dist/
-node dist/cli.js build       # 抓取上游并写出 dist/index.json（及 profile 产出）
+node dist/cli.js build       # 抓取上游并写出 dist/site/index.json（及 profile 产出与统计页）
 node dist/cli.js doctor      # 逐条列出被拒绝的条目及原因
 node dist/cli.js sources     # 列出已配置的来源
 pnpm test                    # 单元测试
@@ -339,7 +355,7 @@ lockfile 是 `pnpm-lock.yaml`，需要提交；CI 使用 `pnpm install --frozen-
 要复现 CI 的校验关卡，可以按 CI 的方式运行校验器：
 
 ```bash
-node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const doc=JSON.parse(fs.readFileSync('dist/index.json','utf8'));const v=m.parseMarketIndex(doc,'https://hytime.github.io/dsh-discover-index/index.json');console.log('valid, plugins='+v.plugins.length)})"
+node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const doc=JSON.parse(fs.readFileSync('dist/site/index.json','utf8'));const v=m.parseMarketIndex(doc,'https://hytime.github.io/dsh-discover-index/index.json');console.log('valid, plugins='+v.plugins.length)})"
 ```
 
 ## 自动化

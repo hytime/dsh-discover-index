@@ -51,10 +51,38 @@ this account. **[Publishing your own plugin market →](FORKING.md)**
 
 ## What it produces
 
-`dist/index.json` — a single format-1 document, published at
+`dist/site/index.json` — a single format-1 document, published at
 <https://hytime.github.io/dsh-discover-index/index.json>. Additional **profiles** declared
 in `config/config.yml` each produce their own document (for example a star-floor subset
 published as its own market), and each is validated independently in CI.
+
+Alongside it: **`stats.html`**, a statistics page generated from the same document.
+
+> `dist/site/` is what gets published; `dist/` also holds the compiled JavaScript, which
+> is not. The Pages artifact is the `dist/site/` directory alone, so the build output is
+> not served as web content.
+
+### What the statistics page shows
+
+<https://hytime.github.io/dsh-discover-index/stats.html>
+
+The market index answers "which plugins exist". The statistics page answers the different
+question a visitor deciding whether to add this market actually has: how much of it is
+measured, and how much of it is trustworthy. It shows:
+
+- **Coverage**, each figure against its own denominator — how many entries carry a star
+  count, a download count, a version history, an `engines.dsh` range, a category, a label,
+  or a risk finding. A single "coverage %" would be a fabricated number here: stars are
+  known for one subset of plugins and DSH ranges for a different one, and dividing both by
+  the same total would invent a fact nobody measured.
+- **Distributions** — versions per plugin, plugins per category, plugins per label.
+- **Who references this project** — repositories whose public files name it, found by
+  GitHub code search.
+
+Everything is computed at build time from the document that was just validated, so the page
+cannot describe a market that differs from the published one, and the numbers are in the
+HTML rather than behind a script. The page loads **no third-party script**; the only remote
+hosts it references are this project's own.
 
 ### What the market declares
 
@@ -433,7 +461,7 @@ Node 22, pnpm 9+.
 ```bash
 pnpm install                 # install dependencies exactly as CI does
 pnpm run build               # compile TypeScript to dist/
-node dist/cli.js build       # fetch upstream and write dist/index.json (+ profiles)
+node dist/cli.js build       # fetch upstream, write dist/site/index.json (+ profiles + stats.html)
 node dist/cli.js doctor      # per-entry rejections and why
 node dist/cli.js sources     # list configured sources
 pnpm test                    # unit tests
@@ -454,7 +482,7 @@ To reproduce exactly what the workflow gates on, run the validator the way CI do
 derives the origin from the repository running the job, so this form works for any fork:
 
 ```bash
-GITHUB_REPOSITORY=hytime/dsh-discover-index node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [o,r]=process.env.GITHUB_REPOSITORY.split('/');const doc=JSON.parse(fs.readFileSync('dist/index.json','utf8'));const v=m.parseMarketIndex(doc,'https://'+o+'.github.io/'+r+'/index.json');console.log('valid, plugins='+v.plugins.length)})"
+GITHUB_REPOSITORY=hytime/dsh-discover-index node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [o,r]=process.env.GITHUB_REPOSITORY.split('/');const doc=JSON.parse(fs.readFileSync('dist/site/index.json','utf8'));const v=m.parseMarketIndex(doc,'https://'+o+'.github.io/'+r+'/index.json');console.log('valid, plugins='+v.plugins.length)})"
 ```
 
 ## Automation

@@ -78,6 +78,10 @@ jobs:
         # Fetching upstream and resolving git-only entries needs the network.
         # Retried so a transient third-party blip does not skip a day's publish;
         # today's published index stays live either way.
+        env:
+          # Raises the GitHub API rate limit for git resolution, and lets the
+          # statistics page's code-search sweep run instead of being throttled.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           for attempt in 1 2 3; do
@@ -94,14 +98,14 @@ jobs:
       # The real validator, not a re-implementation: the same package DSH's
       # Discover tab reads the index with. A failure here aborts the job, so
       # the upload and deploy below never run.
-      - name: Validate dist/index.json with the real validator
+      - name: Validate dist/site/index.json with the real validator
         # The index URL is derived from the repository that runs the job, not
         # hardcoded, so a fork validates against its own Pages origin. Format 1
         # resolves relative icon references against this URL, so passing the
         # wrong origin here would silently validate a different document than
         # the one the fork publishes.
         run: |
-          node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');const origin = 'https://' + owner + '.github.io/' + repo;const doc=JSON.parse(fs.readFileSync('dist/index.json','utf8'));const v=m.parseMarketIndex(doc, origin + '/index.json');console.log('valid, plugins='+v.plugins.length)})"
+          node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');const origin = 'https://' + owner + '.github.io/' + repo;const doc=JSON.parse(fs.readFileSync('dist/site/index.json','utf8'));const v=m.parseMarketIndex(doc, origin + '/index.json');console.log('valid, plugins='+v.plugins.length)})"
 
       # --- Gate 2: the index must not be a near-empty document ---------------
       # Catches the failure mode where upstream is down, rate-limited, or has
@@ -112,11 +116,11 @@ jobs:
         run: |
           node -e "
             const fs = require('fs');
-            const doc = JSON.parse(fs.readFileSync('dist/index.json', 'utf8'));
+            const doc = JSON.parse(fs.readFileSync('dist/site/index.json', 'utf8'));
             const count = Array.isArray(doc.plugins) ? doc.plugins.length : 0;
             const floor = 2000;
             if (count < floor) {
-              console.error('FAIL: dist/index.json holds ' + count + ' plugins, below the floor of ' + floor);
+              console.error('FAIL: dist/site/index.json holds ' + count + ' plugins, below the floor of ' + floor);
               console.error('Refusing to publish. Check upstream health with: node dist/cli.js doctor');
               process.exit(1);
             }
@@ -131,17 +135,34 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          for file in dist/*.json; do
-            if [ "$file" = "dist/index.json" ]; then
+          for file in dist/site/*.json; do
+            if [ "$file" = "dist/site/index.json" ]; then
               continue
             fi
             node -e "import('@deepseek-ai/dsh-plugin-market-index').then(m=>{const fs=require('fs');const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');const origin = 'https://' + owner + '.github.io/' + repo;const f=process.argv[1];const doc=JSON.parse(fs.readFileSync(f,'utf8'));const v=m.parseMarketIndex(doc, origin+'/'+f.split('/').pop());console.log('valid '+f+', plugins='+v.plugins.length)})" "$file"
           done
 
+      # --- Gate 3: the statistics page must exist and carry real numbers ----
+      # The page is generated beside the index, so a build that produced one
+      # without the other would deploy a site with a dead link. It also must not
+      # be an empty shell: a page missing its plugin count is a rendering bug
+      # that no format check looks at.
+      - name: Check the statistics page
+        run: |
+          node -e "
+            const fs = require('fs');
+            const html = fs.readFileSync('dist/site/stats.html', 'utf8');
+            if (html.length < 5000) { console.error('FAIL: stats.html is only ' + html.length + ' bytes'); process.exit(1); }
+            const doc = JSON.parse(fs.readFileSync('dist/site/index.json', 'utf8'));
+            const expected = doc.plugins.length.toLocaleString('en-US');
+            if (!html.includes(expected)) { console.error('FAIL: stats.html does not mention the plugin count ' + expected); process.exit(1); }
+            console.log('stats page ok: ' + html.length + ' bytes, mentions ' + expected + ' plugins');
+          "
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: dist
+          path: dist/site
 
   deploy:
     needs: build

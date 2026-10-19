@@ -4,7 +4,9 @@ node_modules/
 # pnpm store, when it is configured inside the project.
 .pnpm-store/
 
-# Build output. Published to GitHub Pages from a CI artifact, never committed.
+# Build output. `dist/` holds compiled JS and is never published;
+# `dist/site/` holds the indexes and the statistics page, which are.
+# Both are produced by CI and never committed.
 dist/
 
 # The Git-resolution cache: per-run, environment-specific, and large.
@@ -17,6 +19,12 @@ data/resolve-cache.json
 
 # Logs
 *.log
+
+# MemSearch memory: per-project, machine-local session journals and the derived
+# Milvus index state. Markdown is the source of truth for memory, but it records
+# this machine's conversations rather than repository content, so it is not
+# committed.
+.memsearch/
 
 # OS noise
 .DS_Store
