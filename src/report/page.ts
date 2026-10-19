@@ -97,11 +97,20 @@ function referencesSection(report: ReferenceReport | undefined): string {
 </section>`
   }
 
+  // An empty list means one of two different things, and they must not read the
+  // same: the sweep looked and found nothing, or the sweep could not look. The
+  // second case is what a rate-limited CI run produces, and rendering it as
+  // "nobody references this" would state a fact we do not have.
   const list = report.references.length === 0
-    ? `<p class="note">${bilingual({
-      en: 'No repository names this project yet.',
-      zh: '目前还没有仓库提到本项目。',
-    })}</p>`
+    ? `<p class="note">${report.incomplete
+      ? bilingual({
+        en: 'No references found, but the sweep did not complete — so this says nothing about whether any exist.',
+        zh: '未发现引用，但本次扫描并未完成——因此这不能说明是否真的没有。',
+      })
+      : bilingual({
+        en: 'No repository names this project yet.',
+        zh: '目前还没有仓库提到本项目。',
+      })}</p>`
     : `<ul>
 ${report.references.map((reference) => `  <li class="ref">
       <a href="https://github.com/${escapeHtml(reference.repository)}">${escapeHtml(reference.repository)}</a>
@@ -112,7 +121,7 @@ ${report.references.map((reference) => `  <li class="ref">
     </li>`).join('\n')}
   </ul>`
 
-  const caveat = report.incomplete
+  const caveat = report.incomplete && report.references.length > 0
     ? `<p class="note">${bilingual({
       en: 'Incomplete: at least one search failed or was truncated, so this is a floor, not a total.',
       zh: '不完整：至少一次搜索失败或被截断，因此这是下限而非总数。',

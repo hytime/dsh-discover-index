@@ -46,6 +46,12 @@ export interface ReferenceReport {
    * sweep is reported as partial rather than as a smaller true number.
    */
   readonly incomplete: boolean
+  /**
+   * Why the sweep was incomplete, when it was. Without this a rate-limited CI run
+   * and a genuine zero look identical in the log, which is exactly the confusion
+   * the page's wording exists to prevent.
+   */
+  readonly failures: readonly string[]
 }
 
 /** GitHub's code search page size is capped at 100. */
@@ -128,7 +134,7 @@ export async function findReferences(options: ReferenceOptions): Promise<Referen
 
   const byRepository = new Map<string, { paths: Set<string>; usesIndexUrl: boolean }>()
   let queries = 0
-  let incomplete = false
+  const failures: string[] = []
 
   const collect = (items: readonly CodeSearchItem[], usesIndexUrl: boolean): void => {
     for (const item of items) {
@@ -152,9 +158,11 @@ export async function findReferences(options: ReferenceOptions): Promise<Referen
       collect(result.items, usesIndexUrl)
       // A total above the page size means the API returned a subset; say so
       // rather than reporting the page length as the count.
-      if (result.total > result.items.length) incomplete = true
-    } catch {
-      incomplete = true
+      if (result.total > result.items.length) {
+        failures.push(`${query}: truncated at ${String(result.items.length)} of ${String(result.total)}`)
+      }
+    } catch (error) {
+      failures.push(`${query}: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -170,6 +178,7 @@ export async function findReferences(options: ReferenceOptions): Promise<Referen
     references,
     urlCitations: references.filter((reference) => reference.usesIndexUrl).length,
     queries,
-    incomplete,
+    incomplete: failures.length > 0,
+    failures,
   }
 }

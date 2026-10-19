@@ -194,8 +194,11 @@ async function commandBuild(args: Map<string, string | true>): Promise<number> {
       })
       process.stdout.write(
         `\nreferences: ${String(references.references.length)} repositories`
-        + `${references.incomplete ? ' (incomplete sweep)' : ''}\n`,
+        + `${references.incomplete ? ' (incomplete)' : ''}\n`,
       )
+      for (const failure of references.failures) {
+        process.stdout.write(`  sweep failure: ${failure}\n`)
+      }
     } catch (error) {
       process.stdout.write(`\nreferences: sweep failed (${error instanceof Error ? error.message : String(error)})\n`)
     }

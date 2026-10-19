@@ -301,6 +301,7 @@ describe('renderStatisticsPage: references are distinguished from zero', () => {
         urlCitations: 1,
         queries: 2,
         incomplete: false,
+        failures: [],
       },
     })
     expect(html).toContain('a/one')
@@ -310,16 +311,34 @@ describe('renderStatisticsPage: references are distinguished from zero', () => {
   it('distinguishes a measured zero from an unmeasured one', () => {
     const html = renderStatisticsPage(computeStatistics(document()), {
       ...options,
-      references: { references: [], urlCitations: 0, queries: 2, incomplete: false },
+      references: { references: [], urlCitations: 0, queries: 2, incomplete: false, failures: [] },
     })
     expect(html).toContain('No repository names this project yet')
     expect(html).not.toContain('Not measured on this build')
   })
 
-  it('says a truncated sweep is a floor', () => {
+  it('does not claim "nobody references this" when the sweep failed', () => {
+    // A rate-limited sweep returns no rows. Rendering that as "no repository
+    // names this project" states a fact we do not have; the two cases must read
+    // differently.
     const html = renderStatisticsPage(computeStatistics(document()), {
       ...options,
-      references: { references: [], urlCitations: 0, queries: 2, incomplete: true },
+      references: { references: [], urlCitations: 0, queries: 2, incomplete: true, failures: ['rate limited'] },
+    })
+    expect(html).not.toContain('No repository names this project yet')
+    expect(html).toContain('the sweep did not complete')
+  })
+
+  it('says a truncated sweep is a floor when it did find something', () => {
+    const html = renderStatisticsPage(computeStatistics(document()), {
+      ...options,
+      references: {
+        references: [{ repository: 'a/one', paths: ['README.md'], usesIndexUrl: false }],
+        urlCitations: 0,
+        queries: 2,
+        incomplete: true,
+        failures: [],
+      },
     })
     expect(html).toContain('Incomplete')
   })
