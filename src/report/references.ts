@@ -33,6 +33,23 @@ export interface Reference {
   readonly usesIndexUrl: boolean
 }
 
+/**
+ * Repository traffic over the trailing window GitHub reports (14 days).
+ *
+ * Kept in the same report as the references because both answer "is anyone
+ * paying attention", but they measure different things and are labelled
+ * differently: traffic counts visits to the repository page, references count
+ * other projects naming this one. GitHub exposes traffic on the core rate limit
+ * rather than the search one, so unlike the code sweep it does not fail when the
+ * shared CI address is throttled.
+ */
+export interface TrafficReport {
+  readonly views: number
+  readonly uniqueVisitors: number
+  readonly clones: number
+  readonly uniqueCloners: number
+}
+
 /** What a reference sweep found, and what it could not see. */
 export interface ReferenceReport {
   /** Repositories naming this project, excluding this one. */
@@ -52,10 +69,21 @@ export interface ReferenceReport {
    * the page's wording exists to prevent.
    */
   readonly failures: readonly string[]
+  /** Repository traffic, when the token could read it. */
+  readonly traffic?: TrafficReport | undefined
 }
 
 /** GitHub's code search page size is capped at 100. */
 const MAX_RESULTS = 100
+
+/**
+ * Pause before retrying a throttled search.
+ *
+ * The limit is 10 requests a minute, so a few seconds is not reliably long
+ * enough; this waits past the window rather than gambling on it. The sweep runs
+ * after the index is built, so the delay costs the run nothing it needs.
+ */
+const SEARCH_RETRY_MS = 20_000
 
 /** One hit from the code search API. */
 interface CodeSearchItem {
@@ -86,14 +114,32 @@ export interface ReferenceOptions {
   readonly fetchImpl?: FetchLike
   /** Injected for tests and for a deterministic report. */
   readonly apiBase?: string
+  /** Pause before retrying a throttled search; injected so tests do not sleep. */
+  readonly wait?: (ms: number) => Promise<void>
 }
 
-/** Run one code search query and return its hits. */
+/**
+ * Run one code search query and return its hits.
+ *
+ * Retries a 429 after a pause, because `/search/code` allows only 10 requests a
+ * minute per address and a CI runner shares its address with whatever else runs
+ * there — the first live run failed both queries this way. One retry turns a
+ * throttled run into a successful one; a second consecutive failure is reported
+ * as a failure rather than retried indefinitely.
+ *
+ * @param fetchImpl - injected HTTP.
+ * @param apiBase - API root.
+ * @param query - the search expression.
+ * @param token - used when present; the endpoint requires authentication.
+ * @param wait - pause before a retry, injected so tests do not sleep.
+ * @returns the hits and the API's total count.
+ */
 async function search(
   fetchImpl: FetchLike,
   apiBase: string,
   query: string,
   token: string | undefined,
+  wait: (ms: number) => Promise<void> = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 ): Promise<{ items: CodeSearchItem[]; total: number }> {
   const url = `${apiBase}/search/code?q=${encodeURIComponent(query)}&per_page=${String(MAX_RESULTS)}`
   const headers: Record<string, string> = {
@@ -101,12 +147,62 @@ async function search(
     'x-github-api-version': '2022-11-28',
   }
   if (token !== undefined) headers['authorization'] = `Bearer ${token}`
-  const response = await fetchImpl(url, { headers })
+  let response = await fetchImpl(url, { headers })
+  if (response.status === 429) {
+    await wait(SEARCH_RETRY_MS)
+    response = await fetchImpl(url, { headers })
+  }
   if (!response.ok) throw new Error(`code search ${String(response.status)} for ${query}`)
   const body = (await response.json()) as CodeSearchResponse
   const items = Array.isArray(body.items) ? (body.items as CodeSearchItem[]) : []
   const total = typeof body.total_count === 'number' ? body.total_count : items.length
   return { items, total }
+}
+
+/**
+ * Read repository traffic, tolerating every failure.
+ *
+ * Requires push access, so a fork's token may not be allowed to read it — which
+ * is why this returns `undefined` rather than throwing or reporting zeros. An
+ * absent measurement and a measured zero are different facts, and the page
+ * renders them differently.
+ *
+ * @param fetchImpl - injected HTTP.
+ * @param apiBase - API root.
+ * @param self - `owner/repo`.
+ * @param token - a token with push access to that repository.
+ * @returns the traffic figures, or `undefined` when unavailable.
+ */
+async function readTraffic(
+  fetchImpl: FetchLike,
+  apiBase: string,
+  self: string,
+  token: string | undefined,
+): Promise<TrafficReport | undefined> {
+  if (token === undefined) return undefined
+  const headers: Record<string, string> = {
+    accept: 'application/vnd.github+json',
+    'x-github-api-version': '2022-11-28',
+    authorization: `Bearer ${token}`,
+  }
+  const read = async (path: string): Promise<{ count?: unknown; uniques?: unknown } | undefined> => {
+    try {
+      const response = await fetchImpl(`${apiBase}/repos/${self}/traffic/${path}`, { headers })
+      if (!response.ok) return undefined
+      return (await response.json()) as { count?: unknown; uniques?: unknown }
+    } catch {
+      return undefined
+    }
+  }
+  const [views, clones] = await Promise.all([read('views'), read('clones')])
+  if (views === undefined && clones === undefined) return undefined
+  const number = (value: unknown): number => (typeof value === 'number' ? value : 0)
+  return {
+    views: number(views?.count),
+    uniqueVisitors: number(views?.uniques),
+    clones: number(clones?.count),
+    uniqueCloners: number(clones?.uniques),
+  }
 }
 
 /**
@@ -154,7 +250,7 @@ export async function findReferences(options: ReferenceOptions): Promise<Referen
   ] as const) {
     queries += 1
     try {
-      const result = await search(fetchImpl, apiBase, query, options.token)
+      const result = await search(fetchImpl, apiBase, query, options.token, options.wait)
       collect(result.items, usesIndexUrl)
       // A total above the page size means the API returned a subset; say so
       // rather than reporting the page length as the count.
@@ -174,11 +270,14 @@ export async function findReferences(options: ReferenceOptions): Promise<Referen
     }))
     .sort((left, right) => left.repository.localeCompare(right.repository))
 
+  const traffic = await readTraffic(fetchImpl, apiBase, options.self, options.token)
+
   return {
     references,
     urlCitations: references.filter((reference) => reference.usesIndexUrl).length,
     queries,
     incomplete: failures.length > 0,
     failures,
+    ...(traffic === undefined ? {} : { traffic }),
   }
 }

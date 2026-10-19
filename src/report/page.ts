@@ -128,6 +128,17 @@ ${report.references.map((reference) => `  <li class="ref">
     })}</p>`
     : ''
 
+  // Traffic measures visits to the repository page, not loads of the index, and
+  // it is only readable with a token that has push access. Absent is shown as
+  // absent rather than as zero.
+  const traffic = report.traffic === undefined
+    ? ''
+    : `<h3 class="subhead">${bilingual({ en: 'Repository traffic (14 days)', zh: '仓库流量（14 天）' })}</h3>
+  <ul class="traffic">
+    <li><strong>${num(report.traffic.views)}</strong> ${bilingual({ en: 'views', zh: '次浏览' })} · <strong>${num(report.traffic.uniqueVisitors)}</strong> ${bilingual({ en: 'unique visitors', zh: '位独立访客' })}</li>
+    <li><strong>${num(report.traffic.clones)}</strong> ${bilingual({ en: 'clones', zh: '次克隆' })} · <strong>${num(report.traffic.uniqueCloners)}</strong> ${bilingual({ en: 'unique cloners', zh: '位独立克隆者' })}</li>
+  </ul>`
+
   return `<section>
   ${heading}
   <p class="lead">${bilingual({
@@ -140,6 +151,7 @@ ${report.references.map((reference) => `  <li class="ref">
     zh: '这是「引用数」，不是「访客数」：GitHub Pages 不保留访问日志，因此有多少人加载过索引在任何地方都没有记录。',
   })}</p>
   ${caveat}
+  ${traffic}
 </section>`
 }
 
@@ -227,6 +239,10 @@ footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--lin
 .ref a:hover { text-decoration: underline; }
 .tag { background: var(--accent-soft); color: var(--accent); border-radius: 999px;
        padding: .05rem .5rem; font-size: .72rem; }
+.subhead { font-size: .92rem; margin: 1.5rem 0 .5rem; }
+.traffic { font-size: .88rem; color: var(--muted); }
+.traffic li { padding: .15rem 0; }
+.traffic strong { color: var(--fg); font-variant-numeric: tabular-nums; }
 .ref-path { color: var(--muted); font-size: .78rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .zh { display: none; }
 html[lang="zh"] .zh { display: inline; }

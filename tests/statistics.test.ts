@@ -262,6 +262,47 @@ describe('findReferences', () => {
     expect(report.incomplete).toBe(true)
   })
 
+  it('retries a throttled search, which is how the first live run failed', async () => {
+    let calls = 0
+    const fetchImpl = (async (url: string) => {
+      if (url.includes('/search/code')) {
+        calls += 1
+        // First attempt of each query is throttled; the retry succeeds.
+        if (calls % 2 === 1) return { ok: false, status: 429, json: async () => ({}) }
+        return { ok: true, status: 200, json: async () => ({ total_count: 1, items: [{ repository: { full_name: 'a/one' }, path: 'x.md' }] }) }
+      }
+      return { ok: false, status: 404, json: async () => ({}) }
+    }) as never
+    const waited: number[] = []
+    const report = await findReferences({ ...base, fetchImpl, wait: async (ms) => { waited.push(ms) } })
+    expect(waited.length).toBeGreaterThan(0)
+    expect(report.references.map((reference) => reference.repository)).toEqual(['a/one'])
+    expect(report.incomplete).toBe(false)
+  })
+
+  it('reports no traffic when the token cannot read it, rather than zeros', async () => {
+    const fetchImpl = (async (url: string) => {
+      if (url.includes('/traffic/')) return { ok: false, status: 403, json: async () => ({}) }
+      return { ok: true, status: 200, json: async () => ({ total_count: 0, items: [] }) }
+    }) as never
+    const report = await findReferences({ ...base, fetchImpl, token: 'x' })
+    expect(report.traffic).toBeUndefined()
+  })
+
+  it('reads repository traffic when it is available', async () => {
+    const fetchImpl = (async (url: string) => {
+      if (url.includes('/traffic/views')) {
+        return { ok: true, status: 200, json: async () => ({ count: 19, uniques: 5 }) }
+      }
+      if (url.includes('/traffic/clones')) {
+        return { ok: true, status: 200, json: async () => ({ count: 77, uniques: 28 }) }
+      }
+      return { ok: true, status: 200, json: async () => ({ total_count: 0, items: [] }) }
+    }) as never
+    const report = await findReferences({ ...base, fetchImpl, token: 'x' })
+    expect(report.traffic).toEqual({ views: 19, uniqueVisitors: 5, clones: 77, uniqueCloners: 28 })
+  })
+
   it('merges several files from one repository into one reference', async () => {
     const { fetchImpl } = stubFetch({
       'dsh-discover-index': {
@@ -327,6 +368,24 @@ describe('renderStatisticsPage: references are distinguished from zero', () => {
     })
     expect(html).not.toContain('No repository names this project yet')
     expect(html).toContain('the sweep did not complete')
+  })
+
+  it('renders traffic when present and omits it when absent', () => {
+    const withTraffic = renderStatisticsPage(computeStatistics(document()), {
+      ...options,
+      references: {
+        references: [], urlCitations: 0, queries: 2, incomplete: false, failures: [],
+        traffic: { views: 19, uniqueVisitors: 5, clones: 77, uniqueCloners: 28 },
+      },
+    })
+    expect(withTraffic).toContain('Repository traffic')
+    expect(withTraffic).toContain('19')
+
+    const withoutTraffic = renderStatisticsPage(computeStatistics(document()), {
+      ...options,
+      references: { references: [], urlCitations: 0, queries: 2, incomplete: false, failures: [] },
+    })
+    expect(withoutTraffic).not.toContain('Repository traffic')
   })
 
   it('says a truncated sweep is a floor when it did find something', () => {
