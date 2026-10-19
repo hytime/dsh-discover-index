@@ -51,9 +51,41 @@ export interface TrafficReport {
 }
 
 /** What a reference sweep found, and what it could not see. */
+/**
+ * How strong the evidence is that a repository actually uses this index.
+ *
+ * Ordered strongest to weakest. The distinction matters because the weak signal
+ * is common and the strong one is not: a list that merely links to this project
+ * is not a consumer of the market, and reporting the two as one number would
+ * overstate adoption — the same mistake as publishing a request counter as a
+ * visitor count.
+ */
+export type AdoptionEvidence =
+  /** The repository cites the published index URL, so something reads it. */
+  | 'cites-url'
+  /** The repository was forked, which is how someone publishes their own copy. */
+  | 'forked'
+  /** Only the project or repository name appears. */
+  | 'mentions'
+
+/** One repository this project is visible in, with the strength of the evidence. */
+export interface Adoption {
+  readonly repository: string
+  readonly evidence: AdoptionEvidence
+  /** Files that carry the signal. */
+  readonly paths: readonly string[]
+}
+
 export interface ReferenceReport {
   /** Repositories naming this project, excluding this one. */
   readonly references: readonly Reference[]
+  /**
+   * The same set, graded by how much each one proves. `mentions` is the weak
+   * tier: a curated list linking to this repository consumes nothing.
+   */
+  readonly adoption: readonly Adoption[]
+  /** Forks of this repository; each one can publish its own copy of the index. */
+  readonly forks: number
   /** Repositories whose text contains the published index URL. */
   readonly urlCitations: number
   /** How many search queries were issued, for the run report. */
@@ -206,6 +238,41 @@ async function readTraffic(
 }
 
 /**
+ * Count forks of this repository.
+ *
+ * A fork is the steepest form of adoption this project can observe without a
+ * server log: the documented way to publish your own market is to fork and point
+ * the build at another catalog. Returns `undefined` when unreadable, so a
+ * failure is not reported as zero.
+ *
+ * @param fetchImpl - injected HTTP.
+ * @param apiBase - API root.
+ * @param self - `owner/repo`.
+ * @param token - optional; the endpoint is public but rate limited without one.
+ * @returns the fork count, or `undefined` when it could not be read.
+ */
+async function readForks(
+  fetchImpl: FetchLike,
+  apiBase: string,
+  self: string,
+  token: string | undefined,
+): Promise<number | undefined> {
+  const headers: Record<string, string> = {
+    accept: 'application/vnd.github+json',
+    'x-github-api-version': '2022-11-28',
+  }
+  if (token !== undefined) headers['authorization'] = `Bearer ${token}`
+  try {
+    const response = await fetchImpl(`${apiBase}/repos/${self}`, { headers })
+    if (!response.ok) return undefined
+    const body = (await response.json()) as { forks_count?: unknown }
+    return typeof body.forks_count === 'number' ? body.forks_count : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/**
  * Find the repositories that name this project.
  *
  * Two queries are issued rather than one, because they answer different
@@ -270,10 +337,24 @@ export async function findReferences(options: ReferenceOptions): Promise<Referen
     }))
     .sort((left, right) => left.repository.localeCompare(right.repository))
 
-  const traffic = await readTraffic(fetchImpl, apiBase, options.self, options.token)
+  const [traffic, forks] = await Promise.all([
+    readTraffic(fetchImpl, apiBase, options.self, options.token),
+    readForks(fetchImpl, apiBase, options.self, options.token),
+  ])
+
+  // Grade every reference. `cites-url` is the only tier that shows something
+  // reads the index; a list that links to this repository proves only that the
+  // project is known, which is why the two are never summed into one figure.
+  const adoption: Adoption[] = references.map((reference) => ({
+    repository: reference.repository,
+    evidence: reference.usesIndexUrl ? 'cites-url' : 'mentions',
+    paths: reference.paths,
+  }))
 
   return {
     references,
+    adoption,
+    forks: forks ?? 0,
     urlCitations: references.filter((reference) => reference.usesIndexUrl).length,
     queries,
     incomplete: failures.length > 0,

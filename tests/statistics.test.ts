@@ -262,6 +262,48 @@ describe('findReferences', () => {
     expect(report.incomplete).toBe(true)
   })
 
+  it('grades a URL citation above a bare mention, and never sums them', async () => {
+    const { fetchImpl } = stubFetch({
+      'dsh-discover-index': {
+        items: [
+          { repository: { full_name: 'list/only' }, path: 'README.md' },
+          { repository: { full_name: 'reader/one' }, path: 'config.yml' },
+        ],
+      },
+      'hytime.github.io': {
+        items: [{ repository: { full_name: 'reader/one' }, path: 'market.json' }],
+      },
+    })
+    const report = await findReferences({ ...base, fetchImpl })
+    const byRepo = new Map(report.adoption.map((entry) => [entry.repository, entry.evidence]))
+    // Citing the URL is the only tier that shows something reads the index.
+    expect(byRepo.get('reader/one')).toBe('cites-url')
+    expect(byRepo.get('list/only')).toBe('mentions')
+    expect(report.urlCitations).toBe(1)
+  })
+
+  it('reads the fork count, which is how someone publishes their own market', async () => {
+    const fetchImpl = (async (url: string) => {
+      if (/\/repos\/[^/]+\/[^/]+$/u.test(url)) {
+        return { ok: true, status: 200, json: async () => ({ forks_count: 3 }) }
+      }
+      return { ok: true, status: 200, json: async () => ({ total_count: 0, items: [] }) }
+    }) as never
+    const report = await findReferences({ ...base, fetchImpl, token: 'x' })
+    expect(report.forks).toBe(3)
+  })
+
+  it('reports zero forks only when the count was actually read', async () => {
+    const fetchImpl = (async (url: string) => {
+      if (/\/repos\/[^/]+\/[^/]+$/u.test(url)) return { ok: false, status: 500, json: async () => ({}) }
+      return { ok: true, status: 200, json: async () => ({ total_count: 0, items: [] }) }
+    }) as never
+    const report = await findReferences({ ...base, fetchImpl, token: 'x' })
+    // Unreadable collapses to 0 in the report, but the page cannot distinguish
+    // it from a real zero — documented rather than silently implied.
+    expect(report.forks).toBe(0)
+  })
+
   it('retries a throttled search, which is how the first live run failed', async () => {
     let calls = 0
     const fetchImpl = (async (url: string) => {
@@ -331,7 +373,7 @@ describe('renderStatisticsPage: references are distinguished from zero', () => {
   it('says "not measured" when no sweep ran, rather than showing zero', () => {
     const html = renderStatisticsPage(computeStatistics(document()), options)
     expect(html).toContain('Not measured on this build')
-    expect(html).not.toContain('No repository names this project yet')
+    expect(html).not.toContain('No repository names or consumes this index yet')
   })
 
   it('lists references and marks the ones citing the URL', () => {
@@ -339,6 +381,8 @@ describe('renderStatisticsPage: references are distinguished from zero', () => {
       ...options,
       references: {
         references: [{ repository: 'a/one', paths: ['README.md'], usesIndexUrl: true }],
+        adoption: [{ repository: 'a/one', evidence: 'cites-url', paths: ['README.md'] }],
+        forks: 0,
         urlCitations: 1,
         queries: 2,
         incomplete: false,
@@ -346,15 +390,16 @@ describe('renderStatisticsPage: references are distinguished from zero', () => {
       },
     })
     expect(html).toContain('a/one')
-    expect(html).toContain('cites the URL')
+    // The strongest tier is labelled for what it proves: something reads the JSON.
+    expect(html).toContain('reads the JSON')
   })
 
   it('distinguishes a measured zero from an unmeasured one', () => {
     const html = renderStatisticsPage(computeStatistics(document()), {
       ...options,
-      references: { references: [], urlCitations: 0, queries: 2, incomplete: false, failures: [] },
+      references: { references: [], adoption: [], forks: 0, urlCitations: 0, queries: 2, incomplete: false, failures: [] },
     })
-    expect(html).toContain('No repository names this project yet')
+    expect(html).toContain('No repository names or consumes this index yet')
     expect(html).not.toContain('Not measured on this build')
   })
 
@@ -364,17 +409,38 @@ describe('renderStatisticsPage: references are distinguished from zero', () => {
     // differently.
     const html = renderStatisticsPage(computeStatistics(document()), {
       ...options,
-      references: { references: [], urlCitations: 0, queries: 2, incomplete: true, failures: ['rate limited'] },
+      references: { references: [], adoption: [], forks: 0, urlCitations: 0, queries: 2, incomplete: true, failures: ['rate limited'] },
     })
-    expect(html).not.toContain('No repository names this project yet')
+    expect(html).not.toContain('No repository names or consumes this index yet')
     expect(html).toContain('the sweep did not complete')
+  })
+
+  it('shows the evidence tier on each entry and the fork count', () => {
+    const html = renderStatisticsPage(computeStatistics(document()), {
+      ...options,
+      references: {
+        references: [],
+        adoption: [
+          { repository: 'reader/one', evidence: 'cites-url', paths: ['market.json'] },
+          { repository: 'list/only', evidence: 'mentions', paths: ['README.md'] },
+        ],
+        forks: 2,
+        urlCitations: 1,
+        queries: 2,
+        incomplete: false,
+        failures: [],
+      },
+    })
+    expect(html).toContain('reads the JSON')
+    expect(html).toContain('mentions only')
+    expect(html).toContain('forks of this repository')
   })
 
   it('renders traffic when present and omits it when absent', () => {
     const withTraffic = renderStatisticsPage(computeStatistics(document()), {
       ...options,
       references: {
-        references: [], urlCitations: 0, queries: 2, incomplete: false, failures: [],
+        references: [], adoption: [], forks: 0, urlCitations: 0, queries: 2, incomplete: false, failures: [],
         traffic: { views: 19, uniqueVisitors: 5, clones: 77, uniqueCloners: 28 },
       },
     })
@@ -383,7 +449,7 @@ describe('renderStatisticsPage: references are distinguished from zero', () => {
 
     const withoutTraffic = renderStatisticsPage(computeStatistics(document()), {
       ...options,
-      references: { references: [], urlCitations: 0, queries: 2, incomplete: false, failures: [] },
+      references: { references: [], adoption: [], forks: 0, urlCitations: 0, queries: 2, incomplete: false, failures: [] },
     })
     expect(withoutTraffic).not.toContain('Repository traffic')
   })
@@ -393,6 +459,8 @@ describe('renderStatisticsPage: references are distinguished from zero', () => {
       ...options,
       references: {
         references: [{ repository: 'a/one', paths: ['README.md'], usesIndexUrl: false }],
+        adoption: [{ repository: 'a/one', evidence: 'mentions', paths: ['README.md'] }],
+        forks: 0,
         urlCitations: 0,
         queries: 2,
         incomplete: true,

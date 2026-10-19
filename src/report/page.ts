@@ -85,7 +85,7 @@ function coverageRow(stat: CoverageStat): string {
  * references" — a claim about the world derived from not having looked.
  */
 function referencesSection(report: ReferenceReport | undefined): string {
-  const heading = `<h2>${bilingual({ en: 'Who references this project', zh: '谁引用了本项目' })}</h2>`
+  const heading = `<h2>${bilingual({ en: 'Who uses this index', zh: '谁在使用这份索引' })}</h2>`
 
   if (report === undefined) {
     return `<section>
@@ -101,23 +101,30 @@ function referencesSection(report: ReferenceReport | undefined): string {
   // same: the sweep looked and found nothing, or the sweep could not look. The
   // second case is what a rate-limited CI run produces, and rendering it as
   // "nobody references this" would state a fact we do not have.
-  const list = report.references.length === 0
+  const tier = (evidence: string): string => {
+    const labels: Record<string, Readonly<Record<string, string>>> = {
+      'cites-url': { en: 'reads the JSON', zh: '读取了 JSON' },
+      forked: { en: 'forked', zh: '已 fork' },
+      mentions: { en: 'mentions only', zh: '仅提及' },
+    }
+    return `<span class="tag tag-${evidence}">${bilingual(labels[evidence] ?? { en: evidence, zh: evidence })}</span>`
+  }
+
+  const list = report.adoption.length === 0
     ? `<p class="note">${report.incomplete
       ? bilingual({
-        en: 'No references found, but the sweep did not complete — so this says nothing about whether any exist.',
-        zh: '未发现引用，但本次扫描并未完成——因此这不能说明是否真的没有。',
+        en: 'No users found, but the sweep did not complete — so this says nothing about whether any exist.',
+        zh: '未发现使用方，但本次扫描并未完成——因此这不能说明是否真的没有。',
       })
       : bilingual({
-        en: 'No repository names this project yet.',
-        zh: '目前还没有仓库提到本项目。',
+        en: 'No repository names or consumes this index yet.',
+        zh: '目前还没有仓库提到或使用这份索引。',
       })}</p>`
     : `<ul>
-${report.references.map((reference) => `  <li class="ref">
-      <a href="https://github.com/${escapeHtml(reference.repository)}">${escapeHtml(reference.repository)}</a>
-      ${reference.usesIndexUrl
-        ? '<span class="tag">' + bilingual({ en: 'cites the URL', zh: '引用了索引地址' }) + '</span>'
-        : ''}
-      <span class="ref-path">${escapeHtml(reference.paths.slice(0, 2).join(', '))}${reference.paths.length > 2 ? ' …' : ''}</span>
+${report.adoption.map((entry) => `  <li class="ref">
+      <a href="https://github.com/${escapeHtml(entry.repository)}">${escapeHtml(entry.repository)}</a>
+      ${tier(entry.evidence)}
+      <span class="ref-path">${escapeHtml(entry.paths.slice(0, 2).join(', '))}${entry.paths.length > 2 ? ' …' : ''}</span>
     </li>`).join('\n')}
   </ul>`
 
@@ -131,6 +138,10 @@ ${report.references.map((reference) => `  <li class="ref">
   // Traffic measures visits to the repository page, not loads of the index, and
   // it is only readable with a token that has push access. Absent is shown as
   // absent rather than as zero.
+  const forks = `<ul class="traffic">
+    <li><strong>${num(report.forks)}</strong> ${bilingual({ en: 'forks of this repository — each can publish its own copy of the index', zh: '个本仓库的 fork——每一个都可以自行发布一份索引副本' })}</li>
+  </ul>`
+
   const traffic = report.traffic === undefined
     ? ''
     : `<h3 class="subhead">${bilingual({ en: 'Repository traffic (14 days)', zh: '仓库流量（14 天）' })}</h3>
@@ -142,15 +153,20 @@ ${report.references.map((reference) => `  <li class="ref">
   return `<section>
   ${heading}
   <p class="lead">${bilingual({
-    en: 'Repositories whose public files name this project, found by GitHub code search. The search index lags by minutes to hours, so a reference made today may not appear yet.',
-    zh: '公开文件中提到本项目的仓库，由 GitHub 代码搜索得出。搜索索引有数分钟到数小时的延迟，因此今天刚产生的引用可能尚未出现。',
+    en: 'Mentioning a project and using it are different things, so each entry is graded. “Reads the JSON” means the published index URL appears in that repository, so something there can load it. “Mentions only” means just the name appears. A fork can publish a copy of its own.',
+    zh: '「提到」与「使用」是两件事，因此每条都标了档位。「读取了 JSON」表示该仓库里出现了已发布的索引地址，说明那里的东西能加载它；「仅提及」表示只出现了项目名；fork 则可能自行发布一份副本。',
   })}</p>
   ${list}
   <p class="note">${bilingual({
-    en: 'This is a reference count, not a visitor count: GitHub Pages keeps no access log, so how many people loaded the index is not recorded anywhere.',
-    zh: '这是「引用数」，不是「访客数」：GitHub Pages 不保留访问日志，因此有多少人加载过索引在任何地方都没有记录。',
+    en: 'A market can be used without leaving a public trace: a client adds the index URL in Discover and nothing is published. When every entry is the weak tier, that is the expected picture rather than a contradiction — it means the market is being linked to but no public code points at it yet.',
+    zh: '市场被使用可以不留下公开痕迹：客户端在 Discover 里填入索引地址即可，什么都不会被发布出去。当所有条目都处于较弱的档位时，这是正常的，并非矛盾——它说明这份市场被链接到了，但还没有公开代码指向它。',
+  })}</p>
+  <p class="note">${bilingual({
+    en: 'The code search index does not cover every repository or every recent change — this project cannot find its own files with it — so these are floors, not totals. And GitHub Pages keeps no access log, so how many clients actually loaded the index is recorded nowhere.',
+    zh: '代码搜索对小型与刚更新的仓库索引并不完整——本项目自己的文件也无法被完整搜到——因此这些是下限而非总数。另外 GitHub Pages 不保留访问日志，所以究竟有多少客户端真的加载过索引，没有任何地方记录。',
   })}</p>
   ${caveat}
+  ${forks}
   ${traffic}
 </section>`
 }
